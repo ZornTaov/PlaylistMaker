@@ -58,6 +58,13 @@ public:
     ExampleApplication() : nanogui::Screen(Eigen::Vector2i(1280, 720), "NanoGUI Test") {
         using namespace nanogui;
         glfwSetJoystickCallback(joystickCallback);
+        
+        if (glfwJoystickIsGamepad(GLFW_JOYSTICK_1))
+        {
+            GLFWgamepadstate state;
+            printf("Gamepad detected: %s\n", glfwGetGamepadName(GLFW_JOYSTICK_1));
+            glfwGetGamepadState(GLFW_JOYSTICK_1, &state);
+        }
         setBackground(Color(235, 235, 235, 255));
         auto *windowLayout = new GroupLayout();
         auto *contentLayout = new GroupLayout();
@@ -124,14 +131,20 @@ public:
         }
         else if (event == GLFW_DISCONNECTED)
             printf("Joystick %d disconnected\n", jid);
+        else if (event == GLFW_JOYSTICK_HAT_BUTTONS)
+            printf("pressed hat");
+        
     }
     virtual bool keyboardEvent(int key, int scancode, int action, int modifiers) {
         if (Screen::keyboardEvent(key, scancode, action, modifiers))
             return true;
         if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS) {
+            printf("escape pressed!\n");
             setVisible(false);
             return true;
         }
+        if (key != 0)
+            printf("b%i, ",key);
         return false;
     }
 
@@ -142,19 +155,79 @@ public:
         if (!glfwGetGamepadState(GLFW_JOYSTICK_1, &gamepad))
         {
             // Gamepad not available, so let's fake it with keyboard
-            gamepad.buttons[GLFW_GAMEPAD_BUTTON_DPAD_LEFT]  = glfwGetKey(window, GLFW_KEY_LEFT);
-            gamepad.buttons[GLFW_GAMEPAD_BUTTON_DPAD_RIGHT] = glfwGetKey(window, GLFW_KEY_RIGHT);
-            gamepad.buttons[GLFW_GAMEPAD_BUTTON_DPAD_UP]    = glfwGetKey(window, GLFW_KEY_UP);
-            gamepad.buttons[GLFW_GAMEPAD_BUTTON_DPAD_DOWN]  = glfwGetKey(window, GLFW_KEY_DOWN);
-            gamepad.buttons[GLFW_GAMEPAD_BUTTON_START]      = glfwGetKey(window, GLFW_KEY_ESCAPE);
+            gamepad.buttons[GLFW_GAMEPAD_BUTTON_DPAD_LEFT]  = glfwGetKey(glfwWindow(), GLFW_KEY_LEFT);
+            gamepad.buttons[GLFW_GAMEPAD_BUTTON_DPAD_RIGHT] = glfwGetKey(glfwWindow(), GLFW_KEY_RIGHT);
+            gamepad.buttons[GLFW_GAMEPAD_BUTTON_DPAD_UP]    = glfwGetKey(glfwWindow(), GLFW_KEY_UP);
+            gamepad.buttons[GLFW_GAMEPAD_BUTTON_DPAD_DOWN]  = glfwGetKey(glfwWindow(), GLFW_KEY_DOWN);
+            gamepad.buttons[GLFW_GAMEPAD_BUTTON_START]      = glfwGetKey(glfwWindow(), GLFW_KEY_ESCAPE);
         }
-
+        // HOW DOES THIS SURPASS 16?!
+        for (int butt = 0; butt <= 16; butt++)
+        {
+            printf("a%d = %d, ", butt, gamepad.buttons[butt]);
+            /*if(gamepad.buttons[i] == GLFW_PRESS)
+            {
+                switch (i)
+                {
+                case GLFW_GAMEPAD_BUTTON_A:
+                    printf("A, ");
+                    break;
+                case GLFW_GAMEPAD_BUTTON_B:
+                    printf("B, ");
+                    break;
+                case GLFW_GAMEPAD_BUTTON_X:
+                    printf("X, ");
+                    break;
+                case GLFW_GAMEPAD_BUTTON_Y:
+                    printf("Y, ");
+                    break;
+                case GLFW_GAMEPAD_BUTTON_LEFT_BUMPER:
+                    printf("L, ");
+                    break;
+                case GLFW_GAMEPAD_BUTTON_RIGHT_BUMPER:
+                    printf("R, ");
+                    break;
+                case GLFW_GAMEPAD_BUTTON_BACK:
+                    printf("-, ");
+                    break;
+                case GLFW_GAMEPAD_BUTTON_START:
+                    printf("+, ");
+                    break;
+                case GLFW_GAMEPAD_BUTTON_GUIDE:
+                    printf("GUIDE, ");
+                    break;
+                case GLFW_GAMEPAD_BUTTON_LEFT_THUMB:
+                    printf("LT, ");
+                    break;
+                case GLFW_GAMEPAD_BUTTON_RIGHT_THUMB:
+                    printf("RT, ");
+                    break;
+                case GLFW_GAMEPAD_BUTTON_DPAD_UP:
+                    printf("UP, ");
+                    break;
+                case GLFW_GAMEPAD_BUTTON_DPAD_RIGHT:
+                    printf("RIGHT, ");
+                    break;
+                case GLFW_GAMEPAD_BUTTON_DPAD_DOWN:
+                    printf("DOWN, ");
+                    break;
+                case GLFW_GAMEPAD_BUTTON_DPAD_LEFT:
+                    printf("LEFT, ");
+                    break;
+                
+                default:
+                    break;
+                }
+            }*/
+        }
         // Exit by pressing Start (aka Plus)
         if (gamepad.buttons[GLFW_GAMEPAD_BUTTON_START] == GLFW_PRESS)
         {
-            glfwSetWindowShouldClose(window, GLFW_TRUE);
-            return true;
+            printf("start pressed!\n");
+            glfwSetWindowShouldClose(glfwWindow(), GLFW_TRUE);
+            //return true;
         }
+        printf("draw\n");
         /* Draw the user interface */
         Screen::draw(ctx);
     }
@@ -175,6 +248,7 @@ int main(int /* argc */, char ** /* argv */) {
     } catch (const std::runtime_error &e) {
         std::string error_msg = std::string("Caught a fatal error: ") + std::string(e.what());
         std::cerr << error_msg << endl;
+        printf(error_msg.c_str());
         return -1;
     }
 
