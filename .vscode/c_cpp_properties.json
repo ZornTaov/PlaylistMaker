@@ -1,0 +1,36 @@
+{
+    "configurations": [
+        {
+            "name": "Switch",
+            "includePath": [
+                "V:/Dev/devkitPro/devkitA64/aarch64-none-elf/include",
+                "V:/Dev/devkitPro/devkitA64/lib/gcc/aarch64-none-elf/8.3.0/include",
+                "V:/Dev/devkitPro/libnx/include",
+                "V:/Dev/devkitPro/portlibs/switch/include",
+                "V:/Dev/devkitPro/portlibs/switch/include/freetype2",
+                "${workspaceFolder}/**",
+                "${workspaceFolder}/../switch-nanogui/src/**",
+                "${workspaceFolder}/../switch-nanogui/include/**",
+                "${workspaceFolder}/../switch-nanogui/ext/eigen/**",
+                "${workspaceFolder}/../switch-nanogui/ext/nanovg/src/**"
+            ],
+            "defines": [
+                "_DEBUG",
+                "UNICODE",
+                "_UNICODE",
+                "__aarch64__",
+                "__SWITCH__",
+                "HAVE_LIBNX",
+                "NANOGUI_LINUX",
+                "NANOGUI_GLAD",
+                "NANOVG_GL3_IMPLEMENTATION"
+            ],
+            "windowsSdkVersion": "10.0.17763.0",
+            "compilerPath": "V:/Dev/devkitPro/devkitA64/bin/aarch64-none-elf-gcc",
+            "cStandard": "c11",
+            "cppStandard": "c++11",
+            "intelliSenseMode": "gcc-x64"
+        }
+    ],
+    "version": 4
+}
