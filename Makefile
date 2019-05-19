@@ -37,13 +37,13 @@ include $(DEVKITPRO)/libnx/switch_rules
 #   of a homebrew executable (.nro). This is intended to be used for sysmodules.
 #   NACP building is skipped as well.
 #---------------------------------------------------------------------------------
-TARGET		:=	nanogui_example
+TARGET		:=	playlist_maker
 BUILD		:=	build.nx
 SOURCES		:=	src
 DATA		:=	data
 NANOGUI_PATH	:= switch-nanogui
-APP_TITLE	:=	nanogui example
-APP_AUTHOR	:=	bylaws
+APP_TITLE	:=	Playlist Maker
+APP_AUTHOR	:=	Zorn Taov
 APP_VERSION	:=	1.0
 
 #---------------------------------------------------------------------------------
@@ -51,7 +51,7 @@ APP_VERSION	:=	1.0
 #---------------------------------------------------------------------------------
 ARCH	:=	-march=armv8-a+crc+crypto -mtune=cortex-a57 -mtp=soft -fPIE
 
-CFLAGS	:=	-g -w -O2 -ffunction-sections \
+CFLAGS	:=	-g -Wall -O2 -ffunction-sections \
 			$(ARCH) $(DEFINES)
 
 CFLAGS	+=	$(INCLUDE) -D__SWITCH__ -DWINDOW_NAME="\"$(APP_TITLE)\"" -DNANOGUI_GLAD -DNANOGUI_LINUX -DNANOVG_GL3_IMPLEMENTATION
