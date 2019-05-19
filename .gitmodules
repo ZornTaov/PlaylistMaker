@@ -1,0 +1,3 @@
+[submodule "switch-nanogui"]
+	path = switch-nanogui
+	url = https://gitlab.com/switchroot/switch-nanogui.git
