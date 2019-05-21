@@ -140,11 +140,11 @@ public:
             return true;
         if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS) {
             printf("escape pressed!\n");
-            setVisible(false);
+            //setVisible(false);
             return true;
         }
-        if (key != 0)
-            printf("b%i, ",key);
+        //if (key != 0)
+            //printf("b%i, ",key);
         return false;
     }
 
@@ -161,13 +161,14 @@ public:
             gamepad.buttons[GLFW_GAMEPAD_BUTTON_DPAD_DOWN]  = glfwGetKey(glfwWindow(), GLFW_KEY_DOWN);
             gamepad.buttons[GLFW_GAMEPAD_BUTTON_START]      = glfwGetKey(glfwWindow(), GLFW_KEY_ESCAPE);
         }
-        // HOW DOES THIS SURPASS 16?!
-        for (int butt = 0; butt <= 16; butt++)
+        /*
+        int butt = 0;
+        for (;butt < 16; butt++)
+        //while (butt < 16)
         {
-            printf("a%d = %d, ", butt, gamepad.buttons[butt]);
-            /*if(gamepad.buttons[i] == GLFW_PRESS)
+            if(gamepad.buttons[butt] == GLFW_PRESS)
             {
-                switch (i)
+                switch (butt)
                 {
                 case GLFW_GAMEPAD_BUTTON_A:
                     printf("A, ");
@@ -218,8 +219,8 @@ public:
                 default:
                     break;
                 }
-            }*/
-        }
+            }
+        }*/
         // Exit by pressing Start (aka Plus)
         if (gamepad.buttons[GLFW_GAMEPAD_BUTTON_START] == GLFW_PRESS)
         {
@@ -227,7 +228,7 @@ public:
             glfwSetWindowShouldClose(glfwWindow(), GLFW_TRUE);
             //return true;
         }
-        printf("draw\n");
+        
         /* Draw the user interface */
         Screen::draw(ctx);
     }
