@@ -33,17 +33,26 @@
 #include <nanogui/colorpicker.h>
 #include <nanogui/graph.h>
 #include <nanogui/navwidget.h>
+
+#include "easylogging++.h"
+
+INITIALIZE_EASYLOGGINGPP
+
 #include <iostream>
 #include <string>
 
+#include "PMjson.hpp"
+#include "Playlist.hpp"
 // Includes for the GLTexture class.
 #include <cstdint>
 #include <memory>
 #include <utility>
-
+#include <switch.h>
+#include <sys/stat.h>
 #if defined(__GNUC__)
 #  pragma GCC diagnostic ignored "-Wmissing-field-initializers"
 #endif
+
 
 using std::cout;
 using std::cerr;
@@ -53,11 +62,10 @@ using std::vector;
 using std::pair;
 using std::to_string;
 
-class ExampleApplication : public nanogui::Screen {
+class PlaylistMakerApp : public nanogui::Screen {
 public:
-    ExampleApplication() : nanogui::Screen(Eigen::Vector2i(1280, 720), "NanoGUI Test") {
+    PlaylistMakerApp() : nanogui::Screen(Eigen::Vector2i(1280, 720), "NanoGUI Test") {
         using namespace nanogui;
-        glfwSetJoystickCallback(joystickCallback);
         
         if (glfwJoystickIsGamepad(GLFW_JOYSTICK_1))
         {
@@ -88,10 +96,10 @@ public:
         // Use overloaded variadic add to fill the nav widget with Different navs.
         Button *b = layer->add<Button>();
         b->setFlags(Button::ToggleButton);
-        b->setChangeCallback([](bool state) { cout << "Toggled" << state << endl; });
+        b->setChangeCallback([](bool state) { printf("Toggled %d\n", state); });
         
         b = layer->add<Button>();
-        b->setCallback([] { cout << "pushed!" << endl; });
+        b->setCallback([] { printf("pushed!\n"); });
         layer = window->createNav("Function Graph");
         layer->setLayout(new GroupLayout());
 
@@ -121,19 +129,25 @@ public:
 
     }
 
-    static void joystickCallback(int jid, int event)
+    virtual bool gamepadButtonEvent(int jid, int button, int action)
     {
-        if (event == GLFW_CONNECTED)
+        /* if (Screen::gamepadButtonEvent(jid, button, action))
         {
-            printf("Joystick %d connected\n", jid);
-            if (glfwJoystickIsGamepad(jid))
-                printf("Joystick %d is gamepad: \"%s\"\n", jid, glfwGetGamepadName(jid));
+            printf("handled");
+            return true;
+        } */
+        if (button == GLFW_GAMEPAD_BUTTON_X && action == GLFW_PRESS)
+        {
+//            PlaylistEntry::PrintPlaylistEntry(PlaylistEntry::DEFAULT_PLAYLIST_ENTRY);
+            Playlist::validateFolders();
+            //PlaylistEntry::PrintPlaylistEntry(PlaylistEntry::generatePlaylistEntry("name", "ext", "romDir", "systemName", "core"));
         }
-        else if (event == GLFW_DISCONNECTED)
-            printf("Joystick %d disconnected\n", jid);
-        else if (event == GLFW_JOYSTICK_HAT_BUTTONS)
-            printf("pressed hat");
-        
+        if (button == GLFW_GAMEPAD_BUTTON_START && action == GLFW_PRESS)
+        {
+            glfwSetWindowShouldClose(glfwWindow(), GLFW_TRUE);
+            return true;
+        }
+        return false;
     }
     virtual bool keyboardEvent(int key, int scancode, int action, int modifiers) {
         if (Screen::keyboardEvent(key, scancode, action, modifiers))
@@ -143,7 +157,7 @@ public:
             //setVisible(false);
             return true;
         }
-        //if (key != 0)
+        //if (action != 0)
             //printf("b%i, ",key);
         return false;
     }
@@ -151,7 +165,7 @@ public:
     virtual void draw(NVGcontext *ctx) {
         
         // Gamepad
-        GLFWgamepadstate gamepad = {};
+        /*GLFWgamepadstate gamepad = {};
         if (!glfwGetGamepadState(GLFW_JOYSTICK_1, &gamepad))
         {
             // Gamepad not available, so let's fake it with keyboard
@@ -160,7 +174,7 @@ public:
             gamepad.buttons[GLFW_GAMEPAD_BUTTON_DPAD_UP]    = glfwGetKey(glfwWindow(), GLFW_KEY_UP);
             gamepad.buttons[GLFW_GAMEPAD_BUTTON_DPAD_DOWN]  = glfwGetKey(glfwWindow(), GLFW_KEY_DOWN);
             gamepad.buttons[GLFW_GAMEPAD_BUTTON_START]      = glfwGetKey(glfwWindow(), GLFW_KEY_ESCAPE);
-        }
+        }*/
         /*
         int butt = 0;
         for (;butt < 16; butt++)
@@ -168,66 +182,16 @@ public:
         {
             if(gamepad.buttons[butt] == GLFW_PRESS)
             {
-                switch (butt)
-                {
-                case GLFW_GAMEPAD_BUTTON_A:
-                    printf("A, ");
-                    break;
-                case GLFW_GAMEPAD_BUTTON_B:
-                    printf("B, ");
-                    break;
-                case GLFW_GAMEPAD_BUTTON_X:
-                    printf("X, ");
-                    break;
-                case GLFW_GAMEPAD_BUTTON_Y:
-                    printf("Y, ");
-                    break;
-                case GLFW_GAMEPAD_BUTTON_LEFT_BUMPER:
-                    printf("L, ");
-                    break;
-                case GLFW_GAMEPAD_BUTTON_RIGHT_BUMPER:
-                    printf("R, ");
-                    break;
-                case GLFW_GAMEPAD_BUTTON_BACK:
-                    printf("-, ");
-                    break;
-                case GLFW_GAMEPAD_BUTTON_START:
-                    printf("+, ");
-                    break;
-                case GLFW_GAMEPAD_BUTTON_GUIDE:
-                    printf("GUIDE, ");
-                    break;
-                case GLFW_GAMEPAD_BUTTON_LEFT_THUMB:
-                    printf("LT, ");
-                    break;
-                case GLFW_GAMEPAD_BUTTON_RIGHT_THUMB:
-                    printf("RT, ");
-                    break;
-                case GLFW_GAMEPAD_BUTTON_DPAD_UP:
-                    printf("UP, ");
-                    break;
-                case GLFW_GAMEPAD_BUTTON_DPAD_RIGHT:
-                    printf("RIGHT, ");
-                    break;
-                case GLFW_GAMEPAD_BUTTON_DPAD_DOWN:
-                    printf("DOWN, ");
-                    break;
-                case GLFW_GAMEPAD_BUTTON_DPAD_LEFT:
-                    printf("LEFT, ");
-                    break;
                 
-                default:
-                    break;
-                }
             }
         }*/
         // Exit by pressing Start (aka Plus)
-        if (gamepad.buttons[GLFW_GAMEPAD_BUTTON_START] == GLFW_PRESS)
+        /*if (gamepad.buttons[GLFW_GAMEPAD_BUTTON_START] == GLFW_PRESS)
         {
             printf("start pressed!\n");
             glfwSetWindowShouldClose(glfwWindow(), GLFW_TRUE);
             //return true;
-        }
+        }*/
         
         /* Draw the user interface */
         Screen::draw(ctx);
@@ -237,9 +201,23 @@ public:
 int main(int /* argc */, char ** /* argv */) {
     try {
         nanogui::init();
+	    PlaylistEntry::Startup();
+        
+        //validatePath("logs");
+        //assuming on unix or switch
+        struct stat st = {0};
+        if (stat("logs", &st) == -1)
+        {
+            mkdir("logs", 0700);
+        }
+        //setup logs, one per day
+        el::Configurations c;
+//        c.setGlobally(el::ConfigurationType::Format, "%datetime{%a %b %d, %H:%m} %msg");
+        c.setGlobally(el::ConfigurationType::Filename, "logs/PlaylistMaker_%datetime{%Y%M%d}.log");
+        el::Loggers::setDefaultConfigurations(c, true);
 
         /* scoped variables */ {
-            nanogui::ref<ExampleApplication> app = new ExampleApplication();
+            nanogui::ref<PlaylistMakerApp> app = new PlaylistMakerApp();
             app->drawAll();
             app->setVisible(true);
             nanogui::mainloop();
@@ -250,7 +228,8 @@ int main(int /* argc */, char ** /* argv */) {
         std::string error_msg = std::string("Caught a fatal error: ") + std::string(e.what());
         std::cerr << error_msg << endl;
         printf(error_msg.c_str());
-        return -1;
+        throw e;
+        //return -1;
     }
 
     return 0;
