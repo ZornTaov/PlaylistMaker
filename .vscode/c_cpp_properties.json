@@ -9,6 +9,7 @@
                 "V:/Dev/devkitPro/portlibs/switch/include",
                 "V:/Dev/devkitPro/portlibs/switch/include/freetype2",
                 "${workspaceFolder}/**",
+                "${workspaceFolder}/include/**",
                 "${workspaceFolder}/switch-nanogui/src/**",
                 "${workspaceFolder}/switch-nanogui/include/**",
                 "${workspaceFolder}/switch-nanogui/ext/eigen/**",

@@ -45,6 +45,7 @@ NANOGUI_PATH	:= switch-nanogui
 APP_TITLE	:=	Playlist Maker
 APP_AUTHOR	:=	Zorn Taov
 APP_VERSION	:=	1.0
+ROMFS		:=  romfs
 
 #---------------------------------------------------------------------------------
 # options for code generation
@@ -56,7 +57,7 @@ CFLAGS	:=	-g -Wall -O0 -ffunction-sections \
 
 CFLAGS	+=	$(INCLUDE) -D__SWITCH__ -DWINDOW_NAME="\"$(APP_TITLE)\"" -DNANOGUI_GLAD -DNANOGUI_LINUX -DNANOVG_GL3_IMPLEMENTATION
 
-CXXFLAGS	:= $(CFLAGS) #-fno-rtti -fno-exceptions
+CXXFLAGS	:= $(CFLAGS) -std=gnu++17 #-fno-rtti -fno-exceptions
 
 ASFLAGS	:=	-g $(ARCH)
 LDFLAGS	=	-specs=$(DEVKITPRO)/libnx/switch.specs -g $(ARCH) -Wl,-Map,$(notdir $*.map)
@@ -69,7 +70,7 @@ LIBS	:= -lnanogui -lglad -lglfw3 -lEGL -lglapi -ldrm_nouveau -lnx -lm
 #---------------------------------------------------------------------------------
 NANOGUI_FULLPATH	:= "$(realpath .)/$(NANOGUI_PATH)"
 LIBDIRS	:= $(PORTLIBS) $(LIBNX) $(NANOGUI_FULLPATH)
-INCLUDES := $(NANOGUI_PATH)/include $(NANOGUI_PATH)/ext/eigen $(NANOGUI_PATH)/ext/nanovg/src
+INCLUDES := include $(NANOGUI_PATH)/include $(NANOGUI_PATH)/ext/eigen $(NANOGUI_PATH)/ext/nanovg/src
 
 #---------------------------------------------------------------------------------
 # no real need to edit anything past this point unless you need to add additional
