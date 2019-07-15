@@ -11,7 +11,6 @@
 #include <stdio.h>
 #include <dirent.h>
 #include <algorithm>
-#include <switch.h>
 
 PMjson PlaylistEntry::DEFAULT_PLAYLIST;
 PMjson PlaylistEntry::DEFAULT_PLAYLIST_ENTRY;

@@ -4,3 +4,6 @@
 [submodule "CRCpp"]
 	path = CRCpp
 	url = https://github.com/d-bahr/CRCpp.git
+[submodule "borealis"]
+	path = borealis
+	url = https://github.com/natinusala/borealis

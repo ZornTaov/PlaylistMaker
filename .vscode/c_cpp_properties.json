@@ -13,6 +13,8 @@
                 "${workspaceFolder}/**",
                 "${workspaceFolder}/include/**",
                 "${workspaceFolder}/CRCpp/inc",
+                "${workspaceFolder}/borealis/library/**",
+                "${workspaceFolder}/borealis/library/include",
                 "${workspaceFolder}/switch-nanogui/src/**",
                 "${workspaceFolder}/switch-nanogui/include/**",
                 "${workspaceFolder}/switch-nanogui/ext/eigen/**",

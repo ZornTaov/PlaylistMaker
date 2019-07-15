@@ -56,22 +56,23 @@ ARCH	:=	-march=armv8-a+crc+crypto -mtune=cortex-a57 -mtp=soft -fPIE
 CFLAGS	:=	-g -Wall -O0 -ffunction-sections \
 			$(ARCH) $(DEFINES)
 
-CFLAGS	+=	$(INCLUDE) -D__SWITCH__ -DWINDOW_NAME="\"$(APP_TITLE)\"" -DNANOGUI_GLAD -DNANOGUI_LINUX -DNANOVG_GL3_IMPLEMENTATION
+CFLAGS	+=	$(INCLUDE) -D__SWITCH__ -DWINDOW_NAME="\"$(APP_TITLE)\"" #-DNANOGUI_GLAD -DNANOGUI_LINUX -DNANOVG_GL3_IMPLEMENTATION
 
 CXXFLAGS	:= $(CFLAGS) -std=gnu++17 #-fno-rtti -fno-exceptions
 
 ASFLAGS	:=	-g $(ARCH)
 LDFLAGS	=	-specs=$(DEVKITPRO)/libnx/switch.specs -g $(ARCH) -Wl,-Map,$(notdir $*.map)
 
-LIBS	:= -lnanogui -lglad -lglfw3 -lEGL -lglapi -ldrm_nouveau -lnx -lm
+LIBS	:= -lnx -lm
 
 #---------------------------------------------------------------------------------
 # list of directories containing libraries, this must be the top level containing
 # include and lib
 #---------------------------------------------------------------------------------
-NANOGUI_FULLPATH	:= "$(realpath .)/$(NANOGUI_PATH)"
-LIBDIRS	:= $(PORTLIBS) $(LIBNX) $(NANOGUI_FULLPATH) $(RETROARCH_FULLPATH)/libretro-db
-INCLUDES := include $(NANOGUI_PATH)/include $(NANOGUI_PATH)/ext/eigen $(NANOGUI_PATH)/ext/nanovg/src CRCpp/inc $(RETROARCH_PATH)/libretro-db $(RETROARCH_PATH)/libretro-common/include
+LIBDIRS	:= $(PORTLIBS) $(LIBNX) $(RETROARCH_FULLPATH)/libretro-db
+INCLUDES := include CRCpp/inc $(RETROARCH_PATH)/libretro-db $(RETROARCH_PATH)/libretro-common/include
+export BOREALIS_PATH := ./borealis
+include $(TOPDIR)/borealis/library/borealis.mk
 
 #---------------------------------------------------------------------------------
 # no real need to edit anything past this point unless you need to add additional
@@ -98,7 +99,8 @@ LIBRETRO_COMMON_C = \
 			 $(LIBRETRO_COMM_DIR)/vfs/vfs_implementation.c \
 			 $(LIBRETRO_COMM_DIR)/encodings/encoding_utf.c \
 			 $(LIBRETRO_COMM_DIR)/compat/compat_strl.c \
-			 $(LIBRETRO_COMM_DIR)/compat/fopen_utf8.c
+			 $(LIBRETRO_COMM_DIR)/compat/fopen_utf8.c \
+			 $(LIBRETRO_COMM_DIR)/features/features_cpu.c
 
 RARCHDB_TOOL_C = \
 			 $(LIBRETRODB_DIR)/rmsgpack.c \
