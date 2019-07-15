@@ -39,6 +39,7 @@ include $(DEVKITPRO)/libnx/switch_rules
 #---------------------------------------------------------------------------------
 TARGET		:=	playlist_maker
 BUILD		:=	build.nx
+RETROARCH_PATH	:= ../retroarch
 SOURCES		:=	src
 DATA		:=	data
 NANOGUI_PATH	:= switch-nanogui
@@ -69,9 +70,8 @@ LIBS	:= -lnanogui -lglad -lglfw3 -lEGL -lglapi -ldrm_nouveau -lnx -lm
 # include and lib
 #---------------------------------------------------------------------------------
 NANOGUI_FULLPATH	:= "$(realpath .)/$(NANOGUI_PATH)"
-LIBDIRS	:= $(PORTLIBS) $(LIBNX) $(NANOGUI_FULLPATH)
-INCLUDES := include $(NANOGUI_PATH)/include $(NANOGUI_PATH)/ext/eigen $(NANOGUI_PATH)/ext/nanovg/src
-INCLUDES := include $(NANOGUI_PATH)/include $(NANOGUI_PATH)/ext/eigen $(NANOGUI_PATH)/ext/nanovg/src CRCpp/inc
+LIBDIRS	:= $(PORTLIBS) $(LIBNX) $(NANOGUI_FULLPATH) $(RETROARCH_FULLPATH)/libretro-db
+INCLUDES := include $(NANOGUI_PATH)/include $(NANOGUI_PATH)/ext/eigen $(NANOGUI_PATH)/ext/nanovg/src CRCpp/inc $(RETROARCH_PATH)/libretro-db $(RETROARCH_PATH)/libretro-common/include
 
 #---------------------------------------------------------------------------------
 # no real need to edit anything past this point unless you need to add additional
@@ -88,7 +88,29 @@ export VPATH	:=	$(foreach dir,$(SOURCES),$(CURDIR)/$(dir)) \
 
 export DEPSDIR	:=	$(CURDIR)/$(BUILD)
 
-CFILES		:=	$(foreach dir,$(SOURCES),$(notdir $(wildcard $(dir)/*.c)))
+RETROARCH_FULLPATH	:= "$(realpath .)/$(RETROARCH_PATH)"
+LIBRETRO_COMM_DIR   :=  $(RETROARCH_FULLPATH)/libretro-common
+LIBRETRODB_DIR   :=  $(RETROARCH_FULLPATH)/libretro-db
+LIBRETRO_COMMON_C = \
+			 $(LIBRETRO_COMM_DIR)/streams/file_stream.c \
+			 $(LIBRETRO_COMM_DIR)/compat/compat_strcasestr.c \
+			 $(LIBRETRO_COMM_DIR)/file/file_path.c \
+			 $(LIBRETRO_COMM_DIR)/vfs/vfs_implementation.c \
+			 $(LIBRETRO_COMM_DIR)/encodings/encoding_utf.c \
+			 $(LIBRETRO_COMM_DIR)/compat/compat_strl.c \
+			 $(LIBRETRO_COMM_DIR)/compat/fopen_utf8.c
+
+RARCHDB_TOOL_C = \
+			 $(LIBRETRODB_DIR)/rmsgpack.c \
+			 $(LIBRETRODB_DIR)/rmsgpack_dom.c \
+			 $(LIBRETRODB_DIR)/bintree.c \
+			 $(LIBRETRODB_DIR)/query.c \
+			 $(LIBRETRODB_DIR)/libretrodb.c \
+			 $(LIBRETRO_COMM_DIR)/compat/compat_fnmatch.c \
+			 $(LIBRETRO_COMM_DIR)/string/stdstring.c \
+			 $(LIBRETRO_COMMON_C)
+
+CFILES		:=	$(foreach dir,$(SOURCES),$(notdir $(wildcard $(dir)/*.c))) $(RARCHDB_TOOL_C)
 CPPFILES	:=	$(foreach dir,$(SOURCES),$(notdir $(wildcard $(dir)/*.cpp)))
 SFILES		:=	$(foreach dir,$(SOURCES),$(notdir $(wildcard $(dir)/*.s)))
 BINFILES	:=	$(foreach dir,$(DATA),$(notdir $(wildcard $(dir)/*.*)))

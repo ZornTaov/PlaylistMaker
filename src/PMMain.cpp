@@ -39,6 +39,9 @@
 INITIALIZE_EASYLOGGINGPP
 
 #include <iostream>
+#include <sstream>
+#include <ios>
+#include <iomanip>
 #include <string>
 
 #include "PMjson.hpp"
@@ -49,6 +52,7 @@ INITIALIZE_EASYLOGGINGPP
 #include <utility>
 #include <switch.h>
 #include <sys/stat.h>
+#include <libretrodb.h>
 #if defined(__GNUC__)
 #  pragma GCC diagnostic ignored "-Wmissing-field-initializers"
 #endif
@@ -61,18 +65,118 @@ using std::string;
 using std::vector;
 using std::pair;
 using std::to_string;
-
+static int counter = 0;
 class PlaylistMakerApp : public nanogui::Screen {
 public:
+    std::string rmsgpack_dom_value_print(struct rmsgpack_dom_value *obj)
+    {
+        unsigned i;
+        std::stringstream ss;
+        switch (obj->type)
+        {
+            case RDT_NULL:
+                ss << "nil";
+                break;
+            case RDT_BOOL:
+                if (obj->val.bool_)
+                    ss << "true";
+                else
+                    ss << "false";
+                break;
+            case RDT_INT:
+                ss << std::dec << (int64_t)obj->val.int_;
+                break;
+            case RDT_UINT:
+                ss << std::dec << (uint64_t)obj->val.uint_;
+                break;
+            case RDT_STRING:
+                ss << "\"" << obj->val.string.buff << "\"";
+                break;
+            case RDT_BINARY:
+                ss << "\"";
+                for (i = 0; i < obj->val.binary.len; i++)
+                    ss << std::hex << std::setfill('0') << std::uppercase << std::setw(2) <<(unsigned short) obj->val.binary.buff[i];
+                ss << "\"";
+                break;
+            case RDT_MAP:
+                ss << "{";
+                for (i = 0; i < obj->val.map.len; i++)
+                {
+                    ss << rmsgpack_dom_value_print(&obj->val.map.items[i].key);
+                    ss << ": ";
+                    ss << rmsgpack_dom_value_print(&obj->val.map.items[i].value);
+                    if (i < (obj->val.map.len - 1))
+                    ss << ", ";
+                }
+                ss << "}";
+                break;
+            case RDT_ARRAY:
+                ss << "[";
+                for (i = 0; i < obj->val.array.len; i++)
+                {
+                    ss << rmsgpack_dom_value_print(&obj->val.array.items[i]);
+                    if (i < (obj->val.array.len - 1))
+                    ss << ", ";
+                }
+                ss << "]";
+                break;
+        }
+        return ss.str();
+    }
+    std::string pingDB(char* path, char* query_exp)
+    {
+        int rv;
+        libretrodb_t *db;
+        libretrodb_cursor_t *cur;
+        libretrodb_query_t *q;
+        struct rmsgpack_dom_value item;
+        const char *error;
+        db  = libretrodb_new();
+        cur = libretrodb_cursor_new();
+        if (!db || !cur)
+        {
+            return "";
+        }
+        error = NULL;
+        if ((rv = libretrodb_open(path, db)) != 0)
+        {
+            printf("Could not open db file '%s': %s\n", path, strerror(-rv));
+            return "";
+        }
+        else
+        {
+            LOG(DEBUG) << "Opened db file " << path;
+        }
+        
+        q = (libretrodb_query_t*)libretrodb_query_compile(db, query_exp, strlen(query_exp), &error);
+
+        if (error)
+        {
+            printf("%s\n", error);
+            //goto error;
+            return "";
+        }
+
+        if ((rv = libretrodb_cursor_open(db, cur, q)) != 0)
+        {
+            printf("Could not open cursor: %s\n", strerror(-rv));
+            //goto error;
+            return "";
+        }
+        string str = "";
+        while (libretrodb_cursor_read_item(cur, &item) == 0)
+        {
+            str += rmsgpack_dom_value_print(&item);
+            str += "\n";
+            rmsgpack_dom_value_free(&item);
+        }
+        libretrodb_cursor_close(cur);
+        libretrodb_close(db);
+        return str;
+    }
     PlaylistMakerApp() : nanogui::Screen(Eigen::Vector2i(1280, 720), "NanoGUI Test") {
         using namespace nanogui;
         
-        if (glfwJoystickIsGamepad(GLFW_JOYSTICK_1))
-        {
-            GLFWgamepadstate state;
-            printf("Gamepad detected: %s\n", glfwGetGamepadName(GLFW_JOYSTICK_1));
-            glfwGetGamepadState(GLFW_JOYSTICK_1, &state);
-        }
         setBackground(Color(235, 235, 235, 255));
         auto *windowLayout = new GroupLayout();
         auto *contentLayout = new GroupLayout();
@@ -147,8 +251,11 @@ public:
         } 
         if (button == GLFW_GAMEPAD_BUTTON_X && action == GLFW_PRESS)
         {
-//            PlaylistEntry::PrintPlaylistEntry(PlaylistEntry::DEFAULT_PLAYLIST_ENTRY);
-            Playlist::validateFolders();
+            //PlaylistEntry::PrintPlaylistEntry(PlaylistEntry::DEFAULT_PLAYLIST_ENTRY);
+            //Playlist::validateFolders();
+            //Playlist::generatePlaylist();
+            std::string str = pingDB((char*)"/retroarch/database/rdb/Nintendo - Super Nintendo Entertainment System.rdb",(char*)"{'name':glob('Soul Blazer*')}");
+            LOG(INFO) << str;
             return true;
             //PlaylistEntry::PrintPlaylistEntry(PlaylistEntry::generatePlaylistEntry("name", "ext", "romDir", "systemName", "core"));
         }
