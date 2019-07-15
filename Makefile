@@ -71,6 +71,7 @@ LIBS	:= -lnanogui -lglad -lglfw3 -lEGL -lglapi -ldrm_nouveau -lnx -lm
 NANOGUI_FULLPATH	:= "$(realpath .)/$(NANOGUI_PATH)"
 LIBDIRS	:= $(PORTLIBS) $(LIBNX) $(NANOGUI_FULLPATH)
 INCLUDES := include $(NANOGUI_PATH)/include $(NANOGUI_PATH)/ext/eigen $(NANOGUI_PATH)/ext/nanovg/src
+INCLUDES := include $(NANOGUI_PATH)/include $(NANOGUI_PATH)/ext/eigen $(NANOGUI_PATH)/ext/nanovg/src CRCpp/inc
 
 #---------------------------------------------------------------------------------
 # no real need to edit anything past this point unless you need to add additional

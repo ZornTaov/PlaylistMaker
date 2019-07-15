@@ -1,3 +1,6 @@
 [submodule "switch-nanogui"]
 	path = switch-nanogui
 	url = https://gitlab.com/switchroot/switch-nanogui.git
+[submodule "CRCpp"]
+	path = CRCpp
+	url = https://github.com/d-bahr/CRCpp.git

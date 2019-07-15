@@ -90,22 +90,32 @@ public:
         window->setFixedWidth(1280);
         window->setHeight(720);
         window->setWidth(1280);
+        window->setSelected(true);
+        window->setLayout(windowLayout);
         Widget* layer = window->createNav("Color Wheel");
         layer->setLayout(contentLayout);
 
         // Use overloaded variadic add to fill the nav widget with Different navs.
         Button *b = layer->add<Button>();
         b->setFlags(Button::ToggleButton);
-        b->setChangeCallback([](bool state) { printf("Toggled %d\n", state); });
+        b->setChangeCallback([](bool state) { cout << "Toggled" << state << endl; });
         
         b = layer->add<Button>();
-        b->setCallback([] { printf("pushed!\n"); });
-        layer = window->createNav("Function Graph");
-        layer->setLayout(new GroupLayout());
+        b->setCallback([] { cout << "pushed!" << endl; });
 
-        layer->add<Label>("Function graph widget", "sans");
+        Widget *sublayout = layer->add<Widget>();
+        sublayout->setLayout(new BoxLayout(Orientation::Horizontal, Alignment::Middle, 0, 4));
+        Label *l = sublayout->add<Label>("a");
+        l = sublayout->add<Label>("b");
+        mProgressLabel = new Label(layer, "Progress bar", "sans");
+        mProgress = new ProgressBar(layer);
 
-        Graph *graph = layer->add<Graph>("Some Function");
+        Widget* layer2 = window->createNav("Function Graph");
+        layer2->setLayout(new GroupLayout());
+
+        layer2->add<Label>("Function graph widget", "sans");
+
+        Graph *graph = layer2->add<Graph>("Some Function");
 
         graph->setHeader("E = 2.35e-3");
         graph->setFooter("Iteration 89");
@@ -114,7 +124,6 @@ public:
         for (int i = 0; i < 100; ++i)
             func[i] = 0.5f * (0.5f * std::sin(i / 10.f) +
                               0.5f * std::cos(i / 23.f) + 1);
-
         // A simple counter.
 
         performLayout();
@@ -131,15 +140,16 @@ public:
 
     virtual bool gamepadButtonEvent(int jid, int button, int action)
     {
-        /* if (Screen::gamepadButtonEvent(jid, button, action))
+        if (Screen::gamepadButtonEvent(jid, button, action))
         {
             printf("handled");
             return true;
-        } */
+        } 
         if (button == GLFW_GAMEPAD_BUTTON_X && action == GLFW_PRESS)
         {
 //            PlaylistEntry::PrintPlaylistEntry(PlaylistEntry::DEFAULT_PLAYLIST_ENTRY);
             Playlist::validateFolders();
+            return true;
             //PlaylistEntry::PrintPlaylistEntry(PlaylistEntry::generatePlaylistEntry("name", "ext", "romDir", "systemName", "core"));
         }
         if (button == GLFW_GAMEPAD_BUTTON_START && action == GLFW_PRESS)
@@ -154,7 +164,7 @@ public:
             return true;
         if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS) {
             printf("escape pressed!\n");
-            //setVisible(false);
+            setVisible(false);
             return true;
         }
         //if (action != 0)
@@ -194,15 +204,18 @@ public:
         }*/
         
         /* Draw the user interface */
+        mProgress->setValue(std::fmod((float) glfwGetTime() / 10, 1.0f));
+		mProgressLabel->setCaption("Progress bar" + to_string(std::fmod((float)glfwGetTime() / 10, 1.0f)));
         Screen::draw(ctx);
     }
+private:
+	nanogui::Label *mProgressLabel;
+    nanogui::ProgressBar *mProgress;
 };
 
 int main(int /* argc */, char ** /* argv */) {
     try {
         nanogui::init();
-	    PlaylistEntry::Startup();
-        
         //validatePath("logs");
         //assuming on unix or switch
         struct stat st = {0};
@@ -215,6 +228,8 @@ int main(int /* argc */, char ** /* argv */) {
 //        c.setGlobally(el::ConfigurationType::Format, "%datetime{%a %b %d, %H:%m} %msg");
         c.setGlobally(el::ConfigurationType::Filename, "logs/PlaylistMaker_%datetime{%Y%M%d}.log");
         el::Loggers::setDefaultConfigurations(c, true);
+	    PlaylistEntry::Startup();
+        
 
         /* scoped variables */ {
             nanogui::ref<PlaylistMakerApp> app = new PlaylistMakerApp();
