@@ -11,7 +11,11 @@
 #include <stdio.h>
 #include <dirent.h>
 #include <algorithm>
-
+#ifndef __SWITCH__
+#define ASSET(_str) "./resources/" _str
+#else
+#define ASSET(_str) "romfs:/" _str
+#endif
 PMjson PlaylistEntry::DEFAULT_PLAYLIST;
 PMjson PlaylistEntry::DEFAULT_PLAYLIST_ENTRY;
 PMjson PlaylistEntry::DEFAULT_SYSTEM_ENTRY;
@@ -29,7 +33,7 @@ void PlaylistEntry::Startup()
     PlaylistEntry::DEFAULT_PLAYLIST_ENTRY = PMjson::parse("{\"name\": \"name\",\"cores\": [\"core\"],\"system\": [\"system\"],\"allExt\": [\"ext\"],\"systemExt\": [\"ext\"]}");
 
     //load systems
-    std::ifstream iSystemsDefault("romfs:/systems.json");
+    std::ifstream iSystemsDefault(ASSET("systems.json"));
     iSystemsDefault >> PMSettings::Systems;
     iSystemsDefault.close();
 
@@ -44,7 +48,7 @@ void PlaylistEntry::Startup()
     {
         LOG(DEBUG) << "Unable to load settings.json, getting default.";
         iSettings.close();
-        std::ifstream iSettingsDefault("romfs:/settings.json");
+        std::ifstream iSettingsDefault(ASSET("settings.json"));
         iSettingsDefault >> PMSettings::Settings;
         iSettingsDefault.close();
         PMSettings::updateSettings();
