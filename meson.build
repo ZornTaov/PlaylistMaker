@@ -12,21 +12,19 @@ PlaylistMaker_files = files(
     'src/Playlist.cpp',
     'src/Playlist.cpp',
     'src/easylogging++.cpp',
-    '../retroarch/libretro-common/streams/file_stream.c',
-	'../retroarch/libretro-common/compat/compat_strcasestr.c',
-	'../retroarch/libretro-common/file/file_path.c',
-	'../retroarch/libretro-common/vfs/vfs_implementation.c',
-	'../retroarch/libretro-common/encodings/encoding_utf.c',
-	'../retroarch/libretro-common/compat/compat_strl.c',
-	'../retroarch/libretro-common/compat/fopen_utf8.c',
-	'../retroarch/libretro-common/features/features_cpu.c',
-	'../retroarch/libretro-db/rmsgpack.c',
-	'../retroarch/libretro-db/rmsgpack_dom.c',
-	'../retroarch/libretro-db/bintree.c',
-	'../retroarch/libretro-db/query.c',
-	'../retroarch/libretro-db/libretrodb.c',
-	'../retroarch/libretro-common/compat/compat_fnmatch.c',
-	'../retroarch/libretro-common/string/stdstring.c',
+    'lib/libretro-common/streams/file_stream.c',
+	'lib/libretro-common/compat/compat_strcasestr.c',
+	'lib/libretro-common/file/file_path.c',
+	'lib/libretro-common/vfs/vfs_implementation.c',
+	'lib/libretro-common/compat/fopen_utf8.c',
+	'lib/libretro-common/features/features_cpu.c',
+	'lib/libretro-db/rmsgpack.c',
+	'lib/libretro-db/rmsgpack_dom.c',
+	'lib/libretro-db/bintree.c',
+	'lib/libretro-db/query.c',
+	'lib/libretro-db/libretrodb.c',
+	'lib/libretro-common/compat/compat_fnmatch.c',
+	'lib/libretro-common/string/stdstring.c'
 )
 
 PlaylistMaker_borealis = executable(
@@ -34,6 +32,6 @@ PlaylistMaker_borealis = executable(
     [ PlaylistMaker_files, borealis_files ],
     dependencies : borealis_dependencies,
     install: true,
-    include_directories: [ borealis_include, include_directories('include'), include_directories('CRCpp/inc'), include_directories('../retroarch/libretro-db')],
+    include_directories: [ borealis_include, include_directories('include'), include_directories('CRCpp/inc'), include_directories('lib/libretro-db')],
     cpp_args: [ '-g', '-O2' ]
 )

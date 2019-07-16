@@ -39,7 +39,6 @@ include $(DEVKITPRO)/libnx/switch_rules
 #---------------------------------------------------------------------------------
 TARGET		:=	playlist_maker
 BUILD		:=	build.nx
-RETROARCH_PATH	:= ../retroarch
 SOURCES		:=	src
 DATA		:=	data
 NANOGUI_PATH	:= switch-nanogui
@@ -69,9 +68,9 @@ LIBS	:= -lnx -lm
 # list of directories containing libraries, this must be the top level containing
 # include and lib
 #---------------------------------------------------------------------------------
-RETROARCH_FULLPATH	:= $(CURDIR)/$(RETROARCH_PATH)
-LIBDIRS	:= $(PORTLIBS) $(LIBNX) $(RETROARCH_PATH)/libretro-db
-INCLUDES := include CRCpp/inc $(RETROARCH_PATH)/libretro-db $(RETROARCH_PATH)/libretro-common/include
+
+LIBDIRS	:= $(PORTLIBS) $(LIBNX) $(CURDIR)/lib/libretro-db
+INCLUDES := include CRCpp/inc lib/libretro-db lib/libretro-common/include
 export BOREALIS_PATH := ./borealis
 include $(TOPDIR)/borealis/library/borealis.mk
 
@@ -90,17 +89,17 @@ export VPATH	:=	$(foreach dir,$(SOURCES),$(CURDIR)/$(dir)) \
 
 export DEPSDIR	:=	$(CURDIR)/$(BUILD)
 
-LIBRETRO_COMM_DIR   :=  $(RETROARCH_FULLPATH)/libretro-common
-LIBRETRODB_DIR   :=  $(RETROARCH_FULLPATH)/libretro-db
+LIBRETRO_COMM_DIR   :=  $(CURDIR)/lib/libretro-common
+LIBRETRODB_DIR   :=  $(CURDIR)/lib/libretro-db
 LIBRETRO_COMMON_C = \
-			 $(LIBRETRO_COMM_DIR)/streams/file_stream.c \
+			 $(LIBRETRO_COMM_DIR)/compat/compat_fnmatch.c \
 			 $(LIBRETRO_COMM_DIR)/compat/compat_strcasestr.c \
-			 $(LIBRETRO_COMM_DIR)/file/file_path.c \
-			 $(LIBRETRO_COMM_DIR)/vfs/vfs_implementation.c \
-			 $(LIBRETRO_COMM_DIR)/encodings/encoding_utf.c \
-			 $(LIBRETRO_COMM_DIR)/compat/compat_strl.c \
 			 $(LIBRETRO_COMM_DIR)/compat/fopen_utf8.c \
-			 $(LIBRETRO_COMM_DIR)/features/features_cpu.c
+			 $(LIBRETRO_COMM_DIR)/features/features_cpu.c \
+			 $(LIBRETRO_COMM_DIR)/file/file_path.c \
+			 $(LIBRETRO_COMM_DIR)/streams/file_stream.c \
+			 $(LIBRETRO_COMM_DIR)/string/stdstring.c \
+			 $(LIBRETRO_COMM_DIR)/vfs/vfs_implementation.c
 
 RARCHDB_TOOL_C = \
 			 $(LIBRETRODB_DIR)/rmsgpack.c \
@@ -108,8 +107,6 @@ RARCHDB_TOOL_C = \
 			 $(LIBRETRODB_DIR)/bintree.c \
 			 $(LIBRETRODB_DIR)/query.c \
 			 $(LIBRETRODB_DIR)/libretrodb.c \
-			 $(LIBRETRO_COMM_DIR)/compat/compat_fnmatch.c \
-			 $(LIBRETRO_COMM_DIR)/string/stdstring.c \
 			 $(LIBRETRO_COMMON_C)
 
 CFILES		:=	$(foreach dir,$(SOURCES),$(notdir $(wildcard $(dir)/*.c))) $(RARCHDB_TOOL_C)
