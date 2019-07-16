@@ -16,8 +16,7 @@ PlaylistMaker_files = files(
 	'lib/libretro-common/compat/compat_strcasestr.c',
 	'lib/libretro-common/file/file_path.c',
 	'lib/libretro-common/vfs/vfs_implementation.c',
-	'lib/libretro-common/compat/fopen_utf8.c',
-	'lib/libretro-common/features/features_cpu.c',
+	'lib/libretro-common/compat/fopen_utf8.c'
 	'lib/libretro-db/rmsgpack.c',
 	'lib/libretro-db/rmsgpack_dom.c',
 	'lib/libretro-db/bintree.c',
