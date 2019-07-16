@@ -45,7 +45,7 @@ NANOGUI_PATH	:= switch-nanogui
 APP_TITLE	:=	Playlist Maker
 APP_AUTHOR	:=	Zorn Taov
 APP_VERSION	:=	1.0
-ROMFS		:=  romfs
+ROMFS		:=  resources
 
 #---------------------------------------------------------------------------------
 # options for code generation
