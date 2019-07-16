@@ -12,17 +12,17 @@
 */
 
 
-#include <Borealis.hpp>
 
-#include "easylogging++.h"
-
-INITIALIZE_EASYLOGGINGPP
 
 #include <iostream>
 #include <sstream>
 #include <ios>
 #include <iomanip>
 #include <string>
+#include <stdio.h>
+#include <stdlib.h>
+#include <Borealis.hpp>
+//#include "easylogging++.h"
 
 #include "PMjson.hpp"
 #include "Playlist.hpp"
@@ -37,13 +37,7 @@ INITIALIZE_EASYLOGGINGPP
 #endif
 
 
-using std::cout;
-using std::cerr;
-using std::endl;
-using std::string;
-using std::vector;
-using std::pair;
-using std::to_string;
+using namespace std;
 static int counter = 0;
 class PlaylistMakerApp {
 public:
@@ -124,7 +118,7 @@ public:
         }
         else
         {
-            LOG(DEBUG) << "Opened db file " << path;
+            debug("Opened db file %s", path);
         }
         
         q = (libretrodb_query_t*)libretrodb_query_compile(db, query_exp, strlen(query_exp), &error);
@@ -172,7 +166,7 @@ public:
         ListItem *installerItem = new ListItem("Open example installer");
         installerItem->setClickListener([](View *view) {
             std::string str = PlaylistMakerApp::pingDB((char*)"/retroarch/database/rdb/Nintendo - Super Nintendo Entertainment System.rdb",(char*)"{'name':glob('Soul Blazer*')}");
-            LOG(INFO) << str;
+            info("%s",str);
         });
 
         testList->addView(themeItem);
@@ -184,10 +178,10 @@ public:
         testList->addView(testLabel);
 
         rootFrame->addTab("First tab", testList);
-        rootFrame->addTab("Second tab", new Rectangle(nvgRGB(0, 0, 255)));
+        //rootFrame->addTab("Second tab", new Rectangle(nvgRGB(0, 0, 255)));
         rootFrame->addSeparator();
-        rootFrame->addTab("Third tab", new Rectangle(nvgRGB(255, 0, 0)));
-        rootFrame->addTab("Fourth tab", new Rectangle(nvgRGB(0, 255, 0)));
+        //rootFrame->addTab("Third tab", new Rectangle(nvgRGB(255, 0, 0)));
+        rootFrame->addTab("Fourth tab", (Rectangle*)(new Rectangle(nvgRGB(0, 255, 0))));
 
         // Add the root view to the stack
         Application::pushView(rootFrame);
@@ -209,13 +203,17 @@ int main(int /* argc */, char ** /* argv */) {
         struct stat st = {0};
         if (stat("logs", &st) == -1)
         {
-            mkdir("logs", 0700);
+#if defined(_WIN32)
+                _mkdir("logs");
+#else 
+                mkdir("logs", 0700);
+#endif
         }
         //setup logs, one per day
-        el::Configurations c;
+        /*el::Configurations c;
 //        c.setGlobally(el::ConfigurationType::Format, "%datetime{%a %b %d, %H:%m} %msg");
         c.setGlobally(el::ConfigurationType::Filename, "logs/PlaylistMaker_%datetime{%Y%M%d}.log");
-        el::Loggers::setDefaultConfigurations(c, true);
+        el::Loggers::setDefaultConfigurations(c, true);*/
 	    PlaylistEntry::Startup();
         
 

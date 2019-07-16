@@ -8,13 +8,13 @@
                 "V:/Dev/devkitPro/libnx/include",
                 "V:/Dev/devkitPro/portlibs/switch/include",
                 "V:/Dev/devkitPro/portlibs/switch/include/freetype2",
-                "${workspaceFolder}/lib/libretro-db/**",
-                "${workspaceFolder}/lib/libretro-common/include/**",
                 "${workspaceFolder}/**",
                 "${workspaceFolder}/include/**",
                 "${workspaceFolder}/CRCpp/inc",
                 "${workspaceFolder}/borealis/library/**",
-                "${workspaceFolder}/borealis/library/include"
+                "${workspaceFolder}/borealis/library/include",
+                "${workspaceFolder}/lib/libretro-db/**",
+                "${workspaceFolder}/lib/libretro-common/include/**"
             ],
             "defines": [
                 "_DEBUG",
@@ -26,6 +26,29 @@
             ],
             "windowsSdkVersion": "10.0.17763.0",
             "compilerPath": "V:/Dev/devkitPro/devkitA64/bin/aarch64-none-elf-gcc",
+            "cStandard": "c11",
+            "cppStandard": "c++11",
+            "intelliSenseMode": "gcc-x64"
+        },
+        {
+            "name": "Mingw64",
+            "includePath": [
+                "${workspaceFolder}/**",
+                "${workspaceFolder}/include/**",
+                "${workspaceFolder}/CRCpp/inc",
+                "${workspaceFolder}/borealis/library/**",
+                "${workspaceFolder}/borealis/library/lib/**",
+                "${workspaceFolder}/borealis/library/include",
+                "${workspaceFolder}/lib/libretro-db/**",
+                "${workspaceFolder}/lib/libretro-common/include/**"
+            ],
+            "defines": [
+                "_DEBUG",
+                "UNICODE",
+                "_UNICODE"
+            ],
+            "windowsSdkVersion": "10.0.17763.0",
+            "compilerPath": "C:/msys64/mingw64/bin/gcc.exe",
             "cStandard": "c11",
             "cppStandard": "c++11",
             "intelliSenseMode": "gcc-x64"

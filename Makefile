@@ -39,7 +39,7 @@ include $(DEVKITPRO)/libnx/switch_rules
 #---------------------------------------------------------------------------------
 TARGET		:=	playlist_maker
 BUILD		:=	build.nx
-SOURCES		:=	src
+SOURCES		:=	src lib/libretro-db lib/libretro-common/compat lib/libretro-common/features lib/libretro-common/file lib/libretro-common/streams lib/libretro-common/string lib/libretro-common/vfs
 DATA		:=	data
 NANOGUI_PATH	:= switch-nanogui
 APP_TITLE	:=	Playlist Maker
@@ -71,7 +71,7 @@ LIBS	:= -lnx -lm
 
 LIBDIRS	:= $(PORTLIBS) $(LIBNX) $(CURDIR)/lib/libretro-db
 INCLUDES := include CRCpp/inc lib/libretro-db lib/libretro-common/include
-export BOREALIS_PATH := ./borealis
+export BOREALIS_PATH := borealis
 include $(TOPDIR)/borealis/library/borealis.mk
 
 #---------------------------------------------------------------------------------
@@ -109,7 +109,7 @@ RARCHDB_TOOL_C = \
 			 $(LIBRETRODB_DIR)/libretrodb.c \
 			 $(LIBRETRO_COMMON_C)
 
-CFILES		:=	$(foreach dir,$(SOURCES),$(notdir $(wildcard $(dir)/*.c))) $(RARCHDB_TOOL_C)
+CFILES		:=	$(foreach dir,$(SOURCES),$(notdir $(wildcard $(dir)/*.c)))# $(RARCHDB_TOOL_C)
 CPPFILES	:=	$(foreach dir,$(SOURCES),$(notdir $(wildcard $(dir)/*.cpp)))
 SFILES		:=	$(foreach dir,$(SOURCES),$(notdir $(wildcard $(dir)/*.s)))
 BINFILES	:=	$(foreach dir,$(DATA),$(notdir $(wildcard $(dir)/*.*)))

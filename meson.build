@@ -11,7 +11,6 @@ PlaylistMaker_files = files(
     'src/PMMainBorealis.cpp',
     'src/Playlist.cpp',
     'src/Playlist.cpp',
-    'src/easylogging++.cpp',
     'lib/libretro-common/streams/file_stream.c',
 	'lib/libretro-common/compat/compat_strcasestr.c',
 	'lib/libretro-common/file/file_path.c',
