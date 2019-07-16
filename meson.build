@@ -7,16 +7,31 @@ add_global_arguments('-DWINDOW_NAME="PlaylistMaker Borealis"', language : 'cpp')
 
 subdir('borealis/library')
 
-example_files = files(
+PlaylistMaker_files = files(
     'src/PMMainBorealis.cpp',
     'src/Playlist.cpp',
     'src/Playlist.cpp',
-    'src/easylogging++.cpp'
+    'src/easylogging++.cpp',
+    '../retroarch/libretro-common/streams/file_stream.c',
+	'../retroarch/libretro-common/compat/compat_strcasestr.c',
+	'../retroarch/libretro-common/file/file_path.c',
+	'../retroarch/libretro-common/vfs/vfs_implementation.c',
+	'../retroarch/libretro-common/encodings/encoding_utf.c',
+	'../retroarch/libretro-common/compat/compat_strl.c',
+	'../retroarch/libretro-common/compat/fopen_utf8.c',
+	'../retroarch/libretro-common/features/features_cpu.c',
+	'../retroarch/libretro-db/rmsgpack.c',
+	'../retroarch/libretro-db/rmsgpack_dom.c',
+	'../retroarch/libretro-db/bintree.c',
+	'../retroarch/libretro-db/query.c',
+	'../retroarch/libretro-db/libretrodb.c',
+	'../retroarch/libretro-common/compat/compat_fnmatch.c',
+	'../retroarch/libretro-common/string/stdstring.c',
 )
 
 PlaylistMaker_borealis = executable(
     'PlaylistMaker_borealis',
-    [ example_files, borealis_files ],
+    [ PlaylistMaker_files, borealis_files ],
     dependencies : borealis_dependencies,
     install: true,
     include_directories: [ borealis_include, include_directories('include'), include_directories('CRCpp/inc'), include_directories('../retroarch/libretro-db')],

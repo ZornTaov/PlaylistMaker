@@ -14,11 +14,7 @@
                 "${workspaceFolder}/include/**",
                 "${workspaceFolder}/CRCpp/inc",
                 "${workspaceFolder}/borealis/library/**",
-                "${workspaceFolder}/borealis/library/include",
-                "${workspaceFolder}/switch-nanogui/src/**",
-                "${workspaceFolder}/switch-nanogui/include/**",
-                "${workspaceFolder}/switch-nanogui/ext/eigen/**",
-                "${workspaceFolder}/switch-nanogui/ext/nanovg/src/**"
+                "${workspaceFolder}/borealis/library/include"
             ],
             "defines": [
                 "_DEBUG",
@@ -26,10 +22,7 @@
                 "_UNICODE",
                 "__aarch64__",
                 "__SWITCH__",
-                "HAVE_LIBNX",
-                "NANOGUI_LINUX",
-                "NANOGUI_GLAD",
-                "NANOVG_GL3_IMPLEMENTATION"
+                "HAVE_LIBNX"
             ],
             "windowsSdkVersion": "10.0.17763.0",
             "compilerPath": "V:/Dev/devkitPro/devkitA64/bin/aarch64-none-elf-gcc",

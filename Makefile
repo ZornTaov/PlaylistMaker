@@ -69,7 +69,8 @@ LIBS	:= -lnx -lm
 # list of directories containing libraries, this must be the top level containing
 # include and lib
 #---------------------------------------------------------------------------------
-LIBDIRS	:= $(PORTLIBS) $(LIBNX) $(RETROARCH_FULLPATH)/libretro-db
+RETROARCH_FULLPATH	:= $(CURDIR)/$(RETROARCH_PATH)
+LIBDIRS	:= $(PORTLIBS) $(LIBNX) $(RETROARCH_PATH)/libretro-db
 INCLUDES := include CRCpp/inc $(RETROARCH_PATH)/libretro-db $(RETROARCH_PATH)/libretro-common/include
 export BOREALIS_PATH := ./borealis
 include $(TOPDIR)/borealis/library/borealis.mk
@@ -89,7 +90,6 @@ export VPATH	:=	$(foreach dir,$(SOURCES),$(CURDIR)/$(dir)) \
 
 export DEPSDIR	:=	$(CURDIR)/$(BUILD)
 
-RETROARCH_FULLPATH	:= "$(realpath .)/$(RETROARCH_PATH)"
 LIBRETRO_COMM_DIR   :=  $(RETROARCH_FULLPATH)/libretro-common
 LIBRETRODB_DIR   :=  $(RETROARCH_FULLPATH)/libretro-db
 LIBRETRO_COMMON_C = \
