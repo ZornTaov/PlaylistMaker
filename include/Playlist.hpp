@@ -24,6 +24,7 @@ class PMSettings
 {
 public:
     static void updateSettings();
+    static std::string getRomPath();
     static PMjson Settings;
     static PMjson Systems;
     static std::vector<std::string> zipTypes;

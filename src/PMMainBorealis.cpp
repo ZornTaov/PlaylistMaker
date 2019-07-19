@@ -32,6 +32,10 @@
 #include <utility>
 #include <sys/stat.h>
 #include <libretrodb.h>
+#include <dirent.h>
+#ifdef _WIN32 
+#include <direct.h> 
+#endif
 #if defined(__GNUC__)
 #  pragma GCC diagnostic ignored "-Wmissing-field-initializers"
 #endif
@@ -68,7 +72,11 @@ public:
             case RDT_BINARY:
                 ss << "\"";
                 for (i = 0; i < obj->val.binary.len; i++)
-                    ss << std::hex << std::setfill('0') << std::uppercase << std::setw(2) <<(unsigned short) obj->val.binary.buff[i];
+                {
+                    char buffer[3];
+                    snprintf(buffer,3,"%02X ", (unsigned char) obj->val.binary.buff[i]);
+                    ss << buffer;
+                }
                 ss << "\"";
                 break;
             case RDT_MAP:
@@ -96,24 +104,24 @@ public:
         }
         return ss.str();
     }
-    static std::string pingDB(char* path, char* query_exp)
+    static std::string pingDB(char* path, const char* query_exp)
     {
         int rv;
         libretrodb_t *db;
         libretrodb_cursor_t *cur;
         libretrodb_query_t *q;
         struct rmsgpack_dom_value item;
-        const char *error;
+        const char *dberror;
         db  = libretrodb_new();
         cur = libretrodb_cursor_new();
         if (!db || !cur)
         {
             return "";
         }
-        error = NULL;
+        dberror = NULL;
         if ((rv = libretrodb_open(path, db)) != 0)
         {
-            printf("Could not open db file '%s': %s\n", path, strerror(-rv));
+            error("Could not open db file '%s': %s\n", path, strerror(-rv));
             return "";
         }
         else
@@ -121,18 +129,18 @@ public:
             debug("Opened db file %s", path);
         }
         
-        q = (libretrodb_query_t*)libretrodb_query_compile(db, query_exp, strlen(query_exp), &error);
+        q = (libretrodb_query_t*)libretrodb_query_compile(db, query_exp, strlen(query_exp), &dberror);
 
-        if (error)
+        if (dberror)
         {
-            printf("%s\n", error);
+            error("%s\n", dberror);
             //goto error;
             return "";
         }
 
         if ((rv = libretrodb_cursor_open(db, cur, q)) != 0)
         {
-            printf("Could not open cursor: %s\n", strerror(-rv));
+            error("Could not open cursor: %s\n", strerror(-rv));
             //goto error;
             return "";
         }
@@ -156,7 +164,31 @@ public:
         List *testList = new List();
         ListItem *themeItem = new ListItem("TV Resolution");
         themeItem->setValue("Automatic");
-
+        themeItem->setClickListener([](View *view) {
+#ifdef __SWITCH__
+            char* path = "/retroarch/database/rdb/Nintendo - Super Nintendo Entertainment System.rdb";
+#else
+            char* path = "libretro-database/rdb/Nintendo - Super Nintendo Entertainment System.rdb";
+#endif
+            std::stringstream ss;
+            ss << "{'serial':b'534E532D534F2D555341'}";
+            printLine("debug", ss.str());
+            std::string str = PlaylistMakerApp::pingDB(path,ss.str().c_str());//"{'name':glob('Soul Blazer*')}");
+            printLine("DB",str);
+            std::stringstream ss2;
+            ss2 << "{'sha1':b'F2832EB02547C39CAE3BDAAB5C2A53E4F8B31810'}";
+            printLine("debug", ss2.str());
+            std::string str2 = PlaylistMakerApp::pingDB(path,ss2.str().c_str());//"{'name':glob('Soul Blazer*')}");
+            printLine("DB",str2);
+            std::stringstream ss3;
+            ss3 << "{'md5':b'83CF41D53A1B94AEEA1A645037A24004'}";
+            printLine("debug", ss3.str());
+            std::string str3 = PlaylistMakerApp::pingDB(path,ss3.str().c_str());//"{'name':glob('Soul Blazer*')}");
+            printLine("DB",str3);
+#ifdef __MINGW32__
+            fflush(0);
+#endif
+        });
         ListItem *jankItem = new ListItem("User Interface Jank", "Some people believe homebrews to have a jank user interface. Set to Minimal to have a native look and feel, set to Maximal to have a SX OS look and feel.");
         jankItem->setValue("Minimal");
 
@@ -164,10 +196,7 @@ public:
         crashItem->setClickListener([](View *view){ Application::crash("The software was closed because an error occured:\nSIGABRT (signal 6)"); });
 
         ListItem *installerItem = new ListItem("Open example installer");
-        installerItem->setClickListener([](View *view) {
-            std::string str = PlaylistMakerApp::pingDB((char*)"/retroarch/database/rdb/Nintendo - Super Nintendo Entertainment System.rdb",(char*)"{'name':glob('Soul Blazer*')}");
-            info("%s",str);
-        });
+        
 
         testList->addView(themeItem);
         testList->addView(jankItem);
@@ -178,10 +207,48 @@ public:
         testList->addView(testLabel);
 
         rootFrame->addTab("First tab", testList);
-        //rootFrame->addTab("Second tab", new Rectangle(nvgRGB(0, 0, 255)));
+        rootFrame->addTab("Second tab", new Rectangle(nvgRGB(0, 0, 255)));
         rootFrame->addSeparator();
-        //rootFrame->addTab("Third tab", new Rectangle(nvgRGB(255, 0, 0)));
+        rootFrame->addTab("Third tab", new Rectangle(nvgRGB(255, 0, 0)));
         rootFrame->addTab("Fourth tab", (Rectangle*)(new Rectangle(nvgRGB(0, 255, 0))));
+
+        List *folderContents = new List();
+        DIR* dir;
+        struct dirent* ent;
+        std::string path = PMSettings::getRomPath();
+        debug(path.c_str());
+        dir = opendir(path.c_str());//Open current-working-directory.
+        if(dir==NULL)
+        {
+            error("Failed to open dir.");
+        }
+        else
+        {
+            //LOG(DEBUG)<<"Dir-listing for "<< path;
+            while ((ent = readdir(dir)))
+            {
+#ifdef __SWITCH__
+                if ( ent->d_type == 0x8)
+                {
+                    Label *fileLabel = new Label(LabelStyle::REGULAR, ent->d_name,true);
+                    folderContents->addView(fileLabel);
+                    //romList.push_back(ent->d_name);
+                }
+#else
+                debug("blep "+ent->d_name[ent->d_namlen-3]);
+                if (strcmp(ent->d_name[ent->d_namlen-3]+"",".")==0)
+                {
+                    Label *fileLabel = new Label(LabelStyle::REGULAR, ent->d_name,true);
+                    folderContents->addView(fileLabel);
+                    //romList.push_back(ent->d_name);
+                }
+#endif
+            }
+
+            closedir(dir);
+            //LOG(DEBUG)<<("Done.");
+        }
+        rootFrame->addTab("folder tab", folderContents);
 
         // Add the root view to the stack
         Application::pushView(rootFrame);
@@ -216,7 +283,7 @@ int main(int /* argc */, char ** /* argv */) {
         el::Loggers::setDefaultConfigurations(c, true);*/
 	    PlaylistEntry::Startup();
         
-
+        
         /* scoped variables */ {
             PlaylistMakerApp* app = new PlaylistMakerApp();
 
@@ -229,7 +296,7 @@ int main(int /* argc */, char ** /* argv */) {
     } catch (const std::runtime_error &e) {
         std::string error_msg = std::string("Caught a fatal error: ") + std::string(e.what());
         std::cerr << error_msg << endl;
-        printf(error_msg.c_str());
+        error(error_msg.c_str());
         throw e;
         //return -1;
     }
