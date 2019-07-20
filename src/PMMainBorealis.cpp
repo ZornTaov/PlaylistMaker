@@ -42,9 +42,11 @@
 
 
 using namespace std;
-static int counter = 0;
+//static int counter = 0;
 class PlaylistMakerApp {
 public:
+    TabFrame *rootFrame;
+    static ListItem *crashItem;
     static std::string rmsgpack_dom_value_print(struct rmsgpack_dom_value *obj)
     {
         unsigned i;
@@ -74,7 +76,7 @@ public:
                 for (i = 0; i < obj->val.binary.len; i++)
                 {
                     char buffer[3];
-                    snprintf(buffer,3,"%02X ", (unsigned char) obj->val.binary.buff[i]);
+                    snprintf(buffer,3,"%02X", (unsigned char) obj->val.binary.buff[i]);
                     ss << buffer;
                 }
                 ss << "\"";
@@ -104,7 +106,7 @@ public:
         }
         return ss.str();
     }
-    static std::string pingDB(char* path, const char* query_exp)
+    static std::string pingDB(const char* path, const char* query_exp)
     {
         int rv;
         libretrodb_t *db;
@@ -158,7 +160,7 @@ public:
     PlaylistMakerApp() {
 
         // Create a sample view
-        TabFrame *rootFrame = new TabFrame();
+        rootFrame = new TabFrame();
         rootFrame->setTitle("Borealis Example App");
 
         List *testList = new List();
@@ -166,24 +168,24 @@ public:
         themeItem->setValue("Automatic");
         themeItem->setClickListener([](View *view) {
 #ifdef __SWITCH__
-            char* path = "/retroarch/database/rdb/Nintendo - Super Nintendo Entertainment System.rdb";
+            string path = "/retroarch/database/rdb/Nintendo - Super Nintendo Entertainment System.rdb";
 #else
-            char* path = "libretro-database/rdb/Nintendo - Super Nintendo Entertainment System.rdb";
+            string path = "libretro-database/rdb/Nintendo - Super Nintendo Entertainment System.rdb";
 #endif
             std::stringstream ss;
             ss << "{'serial':b'534E532D534F2D555341'}";
             printLine("debug", ss.str());
-            std::string str = PlaylistMakerApp::pingDB(path,ss.str().c_str());//"{'name':glob('Soul Blazer*')}");
+            std::string str = PlaylistMakerApp::pingDB(path.c_str(),ss.str().c_str());//"{'name':glob('Soul Blazer*')}");
             printLine("DB",str);
             std::stringstream ss2;
             ss2 << "{'sha1':b'F2832EB02547C39CAE3BDAAB5C2A53E4F8B31810'}";
             printLine("debug", ss2.str());
-            std::string str2 = PlaylistMakerApp::pingDB(path,ss2.str().c_str());//"{'name':glob('Soul Blazer*')}");
+            std::string str2 = PlaylistMakerApp::pingDB(path.c_str(),ss2.str().c_str());//"{'name':glob('Soul Blazer*')}");
             printLine("DB",str2);
             std::stringstream ss3;
             ss3 << "{'md5':b'83CF41D53A1B94AEEA1A645037A24004'}";
             printLine("debug", ss3.str());
-            std::string str3 = PlaylistMakerApp::pingDB(path,ss3.str().c_str());//"{'name':glob('Soul Blazer*')}");
+            std::string str3 = PlaylistMakerApp::pingDB(path.c_str(),ss3.str().c_str());//"{'name':glob('Soul Blazer*')}");
             printLine("DB",str3);
 #ifdef __MINGW32__
             fflush(0);
@@ -192,10 +194,17 @@ public:
         ListItem *jankItem = new ListItem("User Interface Jank", "Some people believe homebrews to have a jank user interface. Set to Minimal to have a native look and feel, set to Maximal to have a SX OS look and feel.");
         jankItem->setValue("Minimal");
 
-        ListItem *crashItem = new ListItem("Divide by 0", "Can the Switch do it?");
+        PlaylistMakerApp::crashItem = new ListItem("Divide by 0", "Can the Switch do it?");
         crashItem->setClickListener([](View *view){ Application::crash("The software was closed because an error occured:\nSIGABRT (signal 6)"); });
-
+        
         ListItem *installerItem = new ListItem("Open example installer");
+        jankItem->setClickListener([](View *view){
+            if (PlaylistMakerApp::crashItem != nullptr)
+            {
+                PlaylistMakerApp::crashItem->collapse();
+            }
+             
+        });
         
 
         testList->addView(themeItem);
@@ -228,20 +237,23 @@ public:
             while ((ent = readdir(dir)))
             {
 #ifdef __SWITCH__
-                if ( ent->d_type == 0x8)
-                {
-                    Label *fileLabel = new Label(LabelStyle::REGULAR, ent->d_name,true);
-                    folderContents->addView(fileLabel);
-                    //romList.push_back(ent->d_name);
-                }
+                //if ( ent->d_type == 0x8)
+                //{
 #else
-                debug("blep "+ent->d_name[ent->d_namlen-3]);
-                if (strcmp(ent->d_name[ent->d_namlen-3]+"",".")==0)
+                /* if (ent->d_namlen > 4 )
                 {
-                    Label *fileLabel = new Label(LabelStyle::REGULAR, ent->d_name,true);
+                    //debug("blep %s", ent->d_name[ent->d_namlen-3]);
+                    if (ent->d_namlen > 4 && string(ent->d_name).find_last_of(".") != string::npos && string(ent->d_name).substr(string(ent->d_name).find_last_of("."),1)==".")
+                    { */
+#endif
+                    ListItem *fileLabel = new ListItem(ent->d_name);
                     folderContents->addView(fileLabel);
-                    //romList.push_back(ent->d_name);
-                }
+                    
+#ifdef __SWITCH__
+                //}
+#else
+                    /* }
+                } */
 #endif
             }
 
@@ -250,8 +262,6 @@ public:
         }
         rootFrame->addTab("folder tab", folderContents);
 
-        // Add the root view to the stack
-        Application::pushView(rootFrame);
     }
 };
 
@@ -287,6 +297,8 @@ int main(int /* argc */, char ** /* argv */) {
         /* scoped variables */ {
             PlaylistMakerApp* app = new PlaylistMakerApp();
 
+        // Add the root view to the stack
+        Application::pushView(app->rootFrame);
             // Run the app
             while (Application::mainLoop());
 
@@ -303,3 +315,4 @@ int main(int /* argc */, char ** /* argv */) {
 
     return 0;
 }
+ListItem *PlaylistMakerApp::crashItem;
