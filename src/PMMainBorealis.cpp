@@ -26,6 +26,7 @@
 
 #include "PMjson.hpp"
 #include "Playlist.hpp"
+#include "PMSettings.hpp"
 // Includes for the GLTexture class.
 #include <cstdint>
 #include <memory>
@@ -291,7 +292,7 @@ int main(int /* argc */, char ** /* argv */) {
 //        c.setGlobally(el::ConfigurationType::Format, "%datetime{%a %b %d, %H:%m} %msg");
         c.setGlobally(el::ConfigurationType::Filename, "logs/PlaylistMaker_%datetime{%Y%M%d}.log");
         el::Loggers::setDefaultConfigurations(c, true);*/
-	    PlaylistEntry::Startup();
+	    PMSettings::Startup();
         
         
         /* scoped variables */ {

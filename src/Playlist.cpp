@@ -1,11 +1,12 @@
 #include "Playlist.hpp"
+#include "PMSettings.hpp"
 //#include "easylogging++.h"
 #include <Logger.hpp>
 #include "CRC.h"
 #include <sys/stat.h>
 #include <iostream>
 #include <sstream>
-#include <locale>  
+#include <locale>
 #include <fstream>
 #include <iomanip>
 #include <vector>
@@ -19,59 +20,10 @@
 #ifdef _WIN32 
 #include <direct.h> 
 #endif
-PMjson PlaylistEntry::DEFAULT_PLAYLIST;
-PMjson PlaylistEntry::DEFAULT_PLAYLIST_ENTRY;
-PMjson PlaylistEntry::DEFAULT_SYSTEM_ENTRY;
-
-PMjson PMSettings::Settings;
-PMjson PMSettings::Systems;
-std::vector<std::string> PMSettings::zipTypes = {"7z", "zip", "gz"};
 
 template<class T, size_t N>
 constexpr size_t size(T (&)[N]) { return N; }
 
-void PlaylistEntry::Startup()
-{
-    PlaylistEntry::DEFAULT_PLAYLIST = PMjson::parse("{\"version\": \"1.0\",\"items\": []}");
-    PlaylistEntry::DEFAULT_PLAYLIST_ENTRY = PMjson::parse("{\"name\": \"name\",\"cores\": [\"core\"],\"system\": [\"system\"],\"allExt\": [\"ext\"],\"systemExt\": [\"ext\"]}");
-
-#ifndef __SWITCH__
-    std::string ASSET_LOC = "./resources/";
-#else
-    std::string ASSET_LOC = "romfs:/";
-    romfsInit();
-#endif
-    //load systems
-    std::ifstream iSystemsDefault((ASSET_LOC + "systems.json").c_str());
-    iSystemsDefault >> PMSettings::Systems;
-    iSystemsDefault.close();
-    
-    //load settings
-    std::fstream iSettings("settings.json");
-    if(iSettings.good())
-    {
-        iSettings >> PMSettings::Settings;
-        iSettings.close();
-    }
-    else
-    {
-        debug("Unable to load settings.json, getting default.");
-        iSettings.close();
-        std::ifstream iSettingsDefault((ASSET_LOC + "settings.json").c_str());
-        iSettingsDefault >> PMSettings::Settings;
-        iSettingsDefault.close();
-        PMSettings::updateSettings();
-    }
-#ifdef __SWITCH__
-    romfsExit();
-#endif
-}
-void PMSettings::updateSettings()
-{
-    std::ofstream iSettings("settings.json");
-    iSettings << std::setw(4) << PMSettings::Settings << std::endl;
-    iSettings.close();
-}
 void PlaylistEntry::PrintPlaylistEntry(PMjson entry)
 {
     info("%s", entry.dump(2));//["name"].get<std::string>();
@@ -216,35 +168,16 @@ bool isdir(std::string path)
         return false;
     }
 }
-std::string PMSettings::getRomPath()
-{
-    struct stat st = {0};
-    std::string path = PMSettings::Settings["romsPaths"][PMSettings::Settings["indexRomPathUsed"].get<int>()];
-    if (stat(path.c_str(), &st) == -1)
-    {
-#if defined(_WIN32)
-        _mkdir(path.c_str());
-#else 
-        mkdir(path.c_str(), 0700);
-#endif
-    }
-    return path;
-    
-}
-std::string getCoreFolder(PMjson core)
-{
-    return PMSettings::Settings["useShorthandName"] ? core["name"] : core["system"][0];
-}
 void Playlist::validateFolders()
 {
     for(PMjson core : PMSettings::Systems)
     {
         struct stat st = {0};
-        info("validating rom folder at %s", PMSettings::getRomPath()+getCoreFolder(core));
-        std::string path = PMSettings::getRomPath()+getCoreFolder(core);
+        info("validating rom folder at %s", PMSettings::getRomPath()+PMSettings::getCoreFolder(core));
+        std::string path = PMSettings::getRomPath()+PMSettings::getCoreFolder(core);
         if(stat(path.c_str(), &st) == -1)
         {
-            info("Missing %s", PMSettings::getRomPath()+getCoreFolder(core));
+            info("Missing %s", PMSettings::getRomPath()+PMSettings::getCoreFolder(core));
 #if defined(_WIN32)
             _mkdir(path.c_str());
 #else 
@@ -267,34 +200,6 @@ void Playlist::validateFolders()
         }
     }
     //state = "Validate: Complete";
-}
-bool isZip(std::string ext)
-{
-    std::locale loc;
-    std::transform(ext.begin(), ext.end(), ext.begin(), ::tolower);
-    return array_contains(ext, PMSettings::zipTypes);
-}
-
-bool useAllExt(std::string ext, PMjson core)
-{
-    std::locale loc;
-    std::transform(ext.begin(), ext.end(), ext.begin(), ::tolower);
-    return PMSettings::Settings["useAllExtentions"] && array_contains(ext, core["allExt"]);
-}
-
-bool useSystemExt(std::string ext, PMjson core)
-{
-    std::locale loc;
-    std::transform(ext.begin(), ext.end(), ext.begin(), ::tolower);
-    return core["systemExt"].size() != 0 && array_contains(ext, core["systemExt"]);
-}
-
-bool useAllExtFallback(std::string ext, PMjson core)
-{
-    std::locale loc;
-    std::transform(ext.begin(), ext.end(), ext.begin(), ::tolower);
-    return !PMSettings::Settings["useAllExtentions"] && core["systemExt"].size() == 0 && 
-                        array_contains(ext, core["allExt"]);
 }
 /* void addToPlaylist(system, entries, asJson=False)
 {
@@ -443,11 +348,11 @@ void Playlist::generatePlaylist()
             info("Preparing file list for %s", core["name"]);
             PMjson playlist;
             std::vector<std::string> romList;
-            if( isdir(PMSettings::getRomPath()+getCoreFolder(core)))
+            if( isdir(PMSettings::getRomPath()+PMSettings::getCoreFolder(core)))
             {
                 DIR* dir;
                 struct dirent* ent;
-                std::string path = PMSettings::getRomPath()+getCoreFolder(core);
+                std::string path = PMSettings::getRomPath()+PMSettings::getCoreFolder(core);
                 dir = opendir(path.c_str());//Open current-working-directory.
                 if(dir==NULL)
                 {
@@ -462,8 +367,7 @@ void Playlist::generatePlaylist()
                         if ( ent->d_type == 0x8)
                             romList.push_back(ent->d_name);
 #else
-                        debug(ent->d_name[ent->d_namlen-3]+"");
-                        if (strcmp(ent->d_name[ent->d_namlen-3]+"",".")==0)
+                        if (ent->d_namlen > 4 && string(ent->d_name).find_last_of(".") != string::npos && string(ent->d_name).substr(string(ent->d_name).find_last_of("."),1)==".")
                         {
                             romList.push_back(ent->d_name);
                         }
@@ -480,7 +384,7 @@ void Playlist::generatePlaylist()
             {
                 //LOG(DEBUG) << "found Roms for " << core["name"];
                 //filter if there are .m3u's
-                if( getCoreFolder(core) == "psx")
+                if( PMSettings::getCoreFolder(core) == "psx")
                 {
                     info("Special Casing psx m3u's");
                     std::vector<std::string> result;
@@ -491,7 +395,7 @@ void Playlist::generatePlaylist()
                         if( romsplit[1].compare("m3u") == 0)
                         {
                             //load m3u, filter out cue names
-                            std::ifstream m3uFile(PMSettings::getRomPath()+getCoreFolder(core)+"/"+rom);
+                            std::ifstream m3uFile(PMSettings::getRomPath()+PMSettings::getCoreFolder(core)+"/"+rom);
                             
 	                        std::string line;
                             while(std::getline(m3uFile, line))
@@ -514,19 +418,19 @@ void Playlist::generatePlaylist()
                 {
                     std::vector<std::string> romsplit = split(rom, '.');
                     //it's a zip file 
-                    if (isZip(romsplit[1]) ||
+                    if (PMSettings::isZip(romsplit[1]) ||
                         //using all extentions
-                        useAllExt(romsplit[1], core) || 
+                        PMSettings::useAllExt(romsplit[1], core) || 
                         //use only extentions for system
-                        useSystemExt(romsplit[1], core) || 
+                        PMSettings::useSystemExt(romsplit[1], core) || 
                         //fallback if systemExt is empty
-                        useAllExtFallback(romsplit[1], core))
+                        PMSettings::useAllExtFallback(romsplit[1], core))
                     {
                         debug("Adding file %s", rom);
                         std::string coreUsed = core["cores"].size() == 1?core["cores"][0]:"";
                         PMjson romInfo = PlaylistEntry::generatePlaylistEntry(romsplit[0],
                                                                romsplit[1],
-                                                               PMSettings::getRomPath()+getCoreFolder(core),
+                                                               PMSettings::getRomPath()+PMSettings::getCoreFolder(core),
                                                                core["system"][0],
                                                                coreUsed);
                         playlist.push_back(romInfo);
