@@ -48,6 +48,69 @@ class PlaylistMakerApp {
 public:
     TabFrame *rootFrame;
     static ListItem *crashItem;
+    static std::string path;
+    static void generateFolderView(string path, List* folderContents)
+    {
+        debug(path.c_str());
+        DIR* dir;
+        struct dirent* ent;
+        dir = opendir(path.c_str());//Open current-working-directory.
+        if(dir==NULL)
+        {
+            error("Failed to open dir.");
+        }
+        else
+        {
+            //LOG(DEBUG)<<"Dir-listing for "<< path;
+            PlaylistMakerApp::path = path;
+            while ((ent = readdir(dir)))
+            {
+                if (std::string(ent->d_name) == ".")
+                {
+                    continue;
+                }
+                
+                ListItem *fileLabel = new ListItem(ent->d_name);
+                debug("%s", fileLabel->getLabel().c_str());
+                fileLabel->setClickListener([](View *view)
+                {
+                    std::string newPath;
+                    if(((ListItem*)view)->getLabel() == "..")
+                    {
+                        newPath = PlaylistMakerApp::path.substr(0,PlaylistMakerApp::path.find_last_of('/'));
+                        debug("found ..");
+                    }
+                    else if(((ListItem*)view)->getLabel() != ".")
+                    {
+                        newPath = PlaylistMakerApp::path + "/" + ((ListItem*)view)->getLabel();
+                    }
+                    if(((ListItem*)view)->getLabel().length() - ((ListItem*)view)->getLabel().find_last_of(".") != 4)
+                    {
+                        //should be a file?
+                        while(((List*)(view->getParent()))->getViewsCount() > 0)
+                        {
+                            ((List*)(view->getParent()))->removeView(0, true);
+                            ((List*)(view->getParent()))->invalidate();
+                        }
+                        ListItem *pathItem = new ListItem(newPath);
+                        ((List*)(view->getParent()))->addView(pathItem);
+                        ((List*)(view->getParent()))->setFocusedIndex(0);
+                        Application::requestFocus(((List*)(view->getParent())), FocusDirection::NONE);
+                        generateFolderView(newPath,  (List*)(view->getParent()));
+
+                    }
+                    
+                    
+                });
+                folderContents->addView(fileLabel);
+
+            }
+
+            closedir(dir);
+            //LOG(DEBUG)<<("Done.");
+        }
+    }
+
     static std::string rmsgpack_dom_value_print(struct rmsgpack_dom_value *obj)
     {
         unsigned i;
@@ -222,45 +285,14 @@ public:
         rootFrame->addTab("Third tab", new Rectangle(nvgRGB(255, 0, 0)));
         rootFrame->addTab("Fourth tab", (Rectangle*)(new Rectangle(nvgRGB(0, 255, 0))));
 
+        //List *folderTab = new List();
         List *folderContents = new List();
-        DIR* dir;
-        struct dirent* ent;
-        std::string path = PMSettings::getRomPath();
-        debug(path.c_str());
-        dir = opendir(path.c_str());//Open current-working-directory.
-        if(dir==NULL)
-        {
-            error("Failed to open dir.");
-        }
-        else
-        {
-            //LOG(DEBUG)<<"Dir-listing for "<< path;
-            while ((ent = readdir(dir)))
-            {
-#ifdef __SWITCH__
-                //if ( ent->d_type == 0x8)
-                //{
-#else
-                /* if (ent->d_namlen > 4 )
-                {
-                    //debug("blep %s", ent->d_name[ent->d_namlen-3]);
-                    if (ent->d_namlen > 4 && string(ent->d_name).find_last_of(".") != string::npos && string(ent->d_name).substr(string(ent->d_name).find_last_of("."),1)==".")
-                    { */
-#endif
-                    ListItem *fileLabel = new ListItem(ent->d_name);
-                    folderContents->addView(fileLabel);
-                    
-#ifdef __SWITCH__
-                //}
-#else
-                    /* }
-                } */
-#endif
-            }
-
-            closedir(dir);
-            //LOG(DEBUG)<<("Done.");
-        }
+        PlaylistMakerApp::path = PMSettings::getRomPath();
+        ListItem *pathItem = new ListItem(path);
+        folderContents->addView(pathItem);
+        generateFolderView(path, folderContents);
+        //folderTab->addView(folderContents);
+        
         rootFrame->addTab("folder tab", folderContents);
 
     }
@@ -317,3 +349,4 @@ int main(int /* argc */, char ** /* argv */) {
     return 0;
 }
 ListItem *PlaylistMakerApp::crashItem;
+std::string PlaylistMakerApp::path;
