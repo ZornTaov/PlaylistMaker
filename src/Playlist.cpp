@@ -35,7 +35,7 @@ PMjson PlaylistEntry::generatePlaylistEntry(std::string fileName, std::string ex
     std::string romcrc;
     if(core.compare(""))
     {
-        core_path = PMSettings::Settings["romsPaths"].get<std::string>()+core+"_libretro_libnx.nro";
+        core_path = PMSettings::getRomPath()+core+"_libretro_libnx.nro";
     }
     else
     {
@@ -191,7 +191,7 @@ void Playlist::validateFolders()
                 {
                     myfile << i+", ";
                 }
-                for (std::string i : core[PMSettings::Settings["useAllExtentions"] || core["systemExt"].size() == 0 ? "allExt" : "systemExt"])
+                for (std::string i : core[PMSettings::getUseAllExt() || core["systemExt"].size() == 0 ? "allExt" : "systemExt"])
                 {
                     myfile << i+", ";
                 }

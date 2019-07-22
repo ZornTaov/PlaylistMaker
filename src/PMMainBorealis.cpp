@@ -49,7 +49,7 @@ int main(int /* argc */, char ** /* argv */) {
         Application::pushView(app->rootFrame);
             // Run the app
             while (Application::mainLoop());
-
+            PMSettings::Shutdown();
             // Exit
             return EXIT_SUCCESS;
         }
@@ -57,6 +57,7 @@ int main(int /* argc */, char ** /* argv */) {
         std::string error_msg = std::string("Caught a fatal error: ") + std::string(e.what());
         std::cerr << error_msg << endl;
         error(error_msg.c_str());
+        PMSettings::Shutdown();
         throw e;
         //return -1;
     }

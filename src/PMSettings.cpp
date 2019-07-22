@@ -64,6 +64,12 @@ void PMSettings::Startup()
     romfsExit();
 #endif
 }
+
+void PMSettings::Shutdown()
+{
+    PMSettings::updateSettings();
+}
+
 void PMSettings::updateSettings()
 {
     std::ofstream iSettings("settings.json");
@@ -88,6 +94,30 @@ std::string PMSettings::getRomPath()
     }
     return path;
     
+}
+bool PMSettings::getUseAllExt()
+{
+    return PMSettings::Settings["useAllExtentions"];
+}
+void PMSettings::setUseAllExt(bool)
+{
+    PMSettings::Settings["useAllExtentions"] = !PMSettings::getUseAllExt();
+}
+bool PMSettings::getUseShorthand()
+{
+    return PMSettings::Settings["useShorthandName"];
+}
+void PMSettings::setUseShorthand(bool)
+{
+    PMSettings::Settings["useShorthandName"] = !PMSettings::getUseAllExt();
+}
+std::string PMSettings::getNextRomPath()
+{
+    if (PMSettings::Settings["indexRomPathUsed"].get<int>()+1u >= PMSettings::Settings["romsPaths"].size())
+        PMSettings::Settings["indexRomPathUsed"] = 0;
+    else
+        PMSettings::Settings["indexRomPathUsed"] = PMSettings::Settings["indexRomPathUsed"].get<int>()+1;
+    return PMSettings::getRomPath();
 }
 bool PMSettings::isZip(std::string ext)
 {

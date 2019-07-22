@@ -24,7 +24,7 @@
 TabFrame *PlaylistMakerApp::rootFrame;
 ListItem *PlaylistMakerApp::crashItem;
 string PlaylistMakerApp::path;
-
+ListItem *PlaylistMakerApp::pathItem;
 using namespace std;
 
 void PlaylistMakerApp::generateFolderView(string path, List* folderContents)
@@ -32,7 +32,7 @@ void PlaylistMakerApp::generateFolderView(string path, List* folderContents)
     debug(path.c_str());
     DIR* dir;
     struct dirent* ent;
-    dir = opendir(path.c_str());//Open current-working-directory.
+    dir = opendir((path + "/").c_str());//Open current-working-directory.
     if(dir==NULL)
     {
         error("Failed to open dir.");
@@ -52,26 +52,27 @@ void PlaylistMakerApp::generateFolderView(string path, List* folderContents)
             debug("%s", fileLabel->getLabel().c_str());
             fileLabel->setClickListener([](View *view)
             {
+                debug("clicked %s", ((ListItem*)view)->getLabel().c_str());
                 string newPath;
                 if(((ListItem*)view)->getLabel() == "..")
                 {
-                    newPath = PlaylistMakerApp::path.substr(0,PlaylistMakerApp::path.find_last_of('/'));
                     debug("found ..");
+                    newPath = PlaylistMakerApp::path.substr(0,PlaylistMakerApp::path.find_last_of('/'));
                 }
                 else if(((ListItem*)view)->getLabel() != ".")
                 {
+                    debug("found dir or file");
                     newPath = PlaylistMakerApp::path + "/" + ((ListItem*)view)->getLabel();
                 }
                 if(((ListItem*)view)->getLabel().length() - ((ListItem*)view)->getLabel().find_last_of(".") != 4)
                 {
+                    debug("clicked folder");
                     //should be a file?
-                    while(((List*)(view->getParent()))->getViewsCount() > 0)
+                    while(((List*)(view->getParent()))->getViewsCount() > 1)
                     {
-                        ((List*)(view->getParent()))->removeView(0, true);
+                        ((List*)(view->getParent()))->removeView(1, true);
                         ((List*)(view->getParent()))->invalidate();
                     }
-                    ListItem *pathItem = new ListItem(newPath);
-                    ((List*)(view->getParent()))->addView(pathItem);
                     ((List*)(view->getParent()))->setFocusedIndex(0);
                     Application::requestFocus(((List*)(view->getParent())), FocusDirection::NONE);
                     generateFolderView(newPath,  (List*)(view->getParent()));
@@ -258,16 +259,37 @@ PlaylistMakerApp::PlaylistMakerApp() {
     testList->addView(testLabel);
 
     rootFrame->addTab("First tab", testList);
-    rootFrame->addTab("Second tab", new Rectangle(nvgRGB(0, 0, 255)));
+    //rootFrame->addTab("Second tab", new Rectangle(nvgRGB(0, 0, 255)));
     rootFrame->addSeparator();
-    rootFrame->addTab("Third tab", new Rectangle(nvgRGB(255, 0, 0)));
-    rootFrame->addTab("Fourth tab", (Rectangle*)(new Rectangle(nvgRGB(0, 255, 0))));
-
+    //rootFrame->addTab("Third tab", new Rectangle(nvgRGB(255, 0, 0)));
+    //rootFrame->addTab("Fourth tab", (Rectangle*)(new Rectangle(nvgRGB(0, 255, 0))));
+    List* settingsTab = new List();
+    ListItem* tglRomPath = new ListItem("Toggle Rom Path","Cycle through known rom paths.");
+    tglRomPath->setValue(PMSettings::getRomPath());
+    tglRomPath->setClickListener([](View *view)
+    { 
+        ((ListItem*)view)->setValue(PMSettings::getNextRomPath());
+    });
+    ToggleListItem* tglUseAllExtentions = new ToggleListItem("Use All Extentions",PMSettings::getUseAllExt(), "If the Generator should include all known extentions for all emulators for a system, or only use extentions for that system.", ToggleListItemType::YES_NO);
+    tglUseAllExtentions->setClickListener([](View *view)
+    { 
+        PMSettings::setUseAllExt(((ToggleListItem*)view)->getToggleState());
+    });
+    ToggleListItem* tglUseShorthand = new ToggleListItem("Use Shorthand Name", PMSettings::getUseShorthand(), "", ToggleListItemType::YES_NO);
+    tglUseShorthand->setClickListener([](View *view)
+    { 
+        PMSettings::setUseShorthand(((ToggleListItem*)view)->getToggleState());
+    });
+    settingsTab->addView(tglRomPath);
+    settingsTab->addView(tglUseAllExtentions);
+    settingsTab->addView(tglUseShorthand);
+    
+    rootFrame->addTab("Settings", settingsTab);
     //List *folderTab = new List();
     List *folderContents = new List();
     PlaylistMakerApp::path = PMSettings::getRomPath();
-    ListItem *pathItem = new ListItem(path);
-    folderContents->addView(pathItem);
+    PlaylistMakerApp::pathItem = new ListItem(path);
+    folderContents->addView(PlaylistMakerApp::pathItem);
     generateFolderView(path, folderContents);
     //folderTab->addView(folderContents);
     
