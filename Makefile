@@ -55,7 +55,7 @@ ARCH	:=	-march=armv8-a+crc+crypto -mtune=cortex-a57 -mtp=soft -fPIE
 CFLAGS	:=	-g -Wall -O0 -ffunction-sections \
 			$(ARCH) $(DEFINES)
 
-CFLAGS	+=	$(INCLUDE) -D__SWITCH__ -DWINDOW_NAME="\"$(APP_TITLE)\"" #-DNANOGUI_GLAD -DNANOGUI_LINUX -DNANOVG_GL3_IMPLEMENTATION
+CFLAGS	+=	$(INCLUDE) -D__SWITCH__ -DSWITCH=1 -DHAVE_LIBNX=1 -DRA_DB_PATH="" -DWINDOW_NAME="\"$(APP_TITLE)\"" #-DNANOGUI_GLAD -DNANOGUI_LINUX -DNANOVG_GL3_IMPLEMENTATION
 
 CXXFLAGS	:= $(CFLAGS) -std=gnu++17 #-fno-rtti -fno-exceptions
 
