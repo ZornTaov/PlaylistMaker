@@ -75,6 +75,7 @@ void PlaylistMakerApp::generateFolderView(string path, List* folderContents)
                     }
                     ((List*)(view->getParent()))->setFocusedIndex(0);
                     Application::requestFocus(((List*)(view->getParent())), FocusDirection::NONE);
+                    PlaylistMakerApp::pathItem->setValue(newPath);
                     generateFolderView(newPath,  (List*)(view->getParent()));
 
                 }
@@ -270,12 +271,12 @@ PlaylistMakerApp::PlaylistMakerApp() {
     { 
         ((ListItem*)view)->setValue(PMSettings::getNextRomPath());
     });
-    ToggleListItem* tglUseAllExtentions = new ToggleListItem("Use All Extentions",PMSettings::getUseAllExt(), "If the Generator should include all known extentions for all emulators for a system, or only use extentions for that system.", ToggleListItemType::YES_NO);
+    ToggleListItem* tglUseAllExtentions = new ToggleListItem("Use All Extentions",PMSettings::getUseAllExt(), "If the Generator should include all known extentions for all emulators for a system, or only use extentions for that system.");
     tglUseAllExtentions->setClickListener([](View *view)
     { 
         PMSettings::setUseAllExt(((ToggleListItem*)view)->getToggleState());
     });
-    ToggleListItem* tglUseShorthand = new ToggleListItem("Use Shorthand Name", PMSettings::getUseShorthand(), "", ToggleListItemType::YES_NO);
+    ToggleListItem* tglUseShorthand = new ToggleListItem("Use Shorthand Name", PMSettings::getUseShorthand(), "Shorthand = 'GB'\nFull = 'Nintendo - Game Boy'");
     tglUseShorthand->setClickListener([](View *view)
     { 
         PMSettings::setUseShorthand(((ToggleListItem*)view)->getToggleState());
