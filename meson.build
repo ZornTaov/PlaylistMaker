@@ -1,10 +1,10 @@
 project('PlaylistMaker_borealis', ['c', 'cpp'],
     version: '1.0.0',
-    default_options: [ 'buildtype=release', 'strip=true', 'b_ndebug=if-release', 'cpp_std=c++1z' ],
+    default_options: [ 'buildtype=release', 'strip=true', 'b_ndebug=if-release', 'cpp_std=c++17' ],
 )
 
 add_global_arguments('-DWINDOW_NAME="PlaylistMaker Borealis"', language : 'cpp')
-
+add_project_link_arguments(['-lstdc++fs'], language : 'cpp')
 subdir('borealis/library')
 
 PlaylistMaker_files = files(
@@ -12,6 +12,7 @@ PlaylistMaker_files = files(
     'src/Playlist.cpp',
     'src/PMSettings.cpp',
     'src/PMApp.cpp',
+    'src/Explorer.cpp',
     'lib/libretro-common/streams/file_stream.c',
 	'lib/libretro-common/compat/compat_strcasestr.c',
 	'lib/libretro-common/file/file_path.c',

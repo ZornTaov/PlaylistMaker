@@ -14,6 +14,8 @@
                 "${workspaceFolder}/borealis/library/**",
                 "${workspaceFolder}/borealis/library/include",
                 "${workspaceFolder}/lib/libretro-db/**",
+                "${workspaceFolder}/borealis/library/include/nanovg",
+                "${workspaceFolder}/borealis/library/include/libretro-common",
                 "${workspaceFolder}/lib/libretro-common/include/**"
             ],
             "defines": [
@@ -27,7 +29,7 @@
             "windowsSdkVersion": "10.0.17763.0",
             "compilerPath": "V:/Dev/devkitPro/devkitA64/bin/aarch64-none-elf-gcc",
             "cStandard": "c11",
-            "cppStandard": "c++11",
+            "cppStandard": "c++17",
             "intelliSenseMode": "gcc-x64"
         },
         {
@@ -40,7 +42,9 @@
                 "${workspaceFolder}/borealis/library/lib/**",
                 "${workspaceFolder}/borealis/library/include",
                 "${workspaceFolder}/lib/libretro-db/**",
-                "${workspaceFolder}/lib/libretro-common/include/**"
+                "${workspaceFolder}/lib/libretro-common/include/**",
+                "${workspaceFolder}/borealis/library/include/nanovg",
+                "${workspaceFolder}/borealis/library/include/libretro-common"
             ],
             "defines": [
                 "_DEBUG",
@@ -50,7 +54,7 @@
             "windowsSdkVersion": "10.0.17763.0",
             "compilerPath": "C:/msys64/mingw64/bin/gcc.exe",
             "cStandard": "c11",
-            "cppStandard": "c++11",
+            "cppStandard": "c++17",
             "intelliSenseMode": "gcc-x64"
         }
     ],

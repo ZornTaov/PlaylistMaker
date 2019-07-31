@@ -27,6 +27,7 @@ PMjson PlaylistEntry::DEFAULT_SYSTEM_ENTRY;
 
 PMjson PMSettings::Settings;
 PMjson PMSettings::Systems;
+map<string, vector<string>> PMSettings::FileTypeLookup;
 std::vector<std::string> PMSettings::zipTypes = {"7z", "zip", "gz"};
 void PMSettings::Startup()
 {
@@ -60,6 +61,29 @@ void PMSettings::Startup()
         iSettingsDefault.close();
         PMSettings::updateSettings();
     }
+
+    //create lookup table for known extentions
+    for (PMjson system : PMSettings::Systems)
+    {
+        for (string type : system["allExt"])
+        {
+            if (PMSettings::FileTypeLookup.count(type) == 0)
+            {
+                PMSettings::FileTypeLookup[type] = vector<string>();
+            }
+            PMSettings::FileTypeLookup[type].push_back(system["name"]);
+        }   
+    }
+    for (string str : PMSettings::zipTypes)
+    {
+        if (PMSettings::FileTypeLookup.count(str) == 0)
+        {
+            PMSettings::FileTypeLookup[str] = vector<string>();
+        }
+        PMSettings::FileTypeLookup[str].push_back("Zip");
+    }
+    
+
 #ifdef __SWITCH__
     romfsExit();
 #endif

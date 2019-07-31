@@ -3,13 +3,18 @@
 #include "PMjson.hpp"
 #pragma once
 #include <string>
+#include <map>
+#include <vector>
 
 using std::string;
+using std::map;
+using std::vector;
 class PMSettings
 {
 private:
     static PMjson Settings;
 public:
+    static map<string, vector<string>> FileTypeLookup;
     static void Startup();
     static void Shutdown();
     static void updateSettings();

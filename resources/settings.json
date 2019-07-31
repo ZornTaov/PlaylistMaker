@@ -1,6 +1,6 @@
 {
     "retroarchPATH": "/retroarch/",
-    "romsPaths": ["/retroarch/roms/","/roms/"],
+    "romsPaths": ["/retroarch/roms","/roms"],
     "playlistsPath": "/retroarch/playlists/",
     "coresPath": "/retroarch/cores/",
     "indexRomPathUsed": 1,

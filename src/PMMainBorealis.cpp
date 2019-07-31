@@ -60,6 +60,10 @@ int main(int /* argc */, char ** /* argv */) {
         PMSettings::Shutdown();
         throw e;
         //return -1;
+    } catch (exception e)
+    {
+        Application::crash(" blah "+string(e.what()));
+        throw e;
     }
 
     return 0;
