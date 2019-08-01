@@ -161,6 +161,7 @@ PlaylistMakerApp::PlaylistMakerApp() {
     { 
         fs::path newpath(PMSettings::getNextRomPath());
         ((ListItem*)view)->setValue(newpath.string());
+        PlaylistMakerApp::explorer->clear();
         PlaylistMakerApp::explorer->generateFolderView(newpath);
     });
     ToggleListItem* tglUseAllExtentions = new ToggleListItem("Use All Extentions",PMSettings::getUseAllExt(), "If the Generator should include all known extentions for all emulators for a system, or only use extentions for that system.");

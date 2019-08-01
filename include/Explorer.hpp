@@ -44,7 +44,7 @@ public:
     {
         string pat = label.extension().string().substr(1).c_str();
         transform(pat.begin(), pat.end(), pat.begin(), ::tolower);
-        debug("%s: %s, %d, %d", label.string().c_str(), pat, label.has_extension(), PMSettings::FileTypeLookup.count(pat));
+        debug("%s: %s, %d, %d", label.string().c_str(), pat.c_str(), label.has_extension(), PMSettings::FileTypeLookup.count(pat));
         
         if (label.has_extension() && PMSettings::FileTypeLookup.count(pat) == 1)
         {
@@ -70,5 +70,6 @@ public:
     void generateFolderView(fs::path path);
     void sortChildren();
     View* getAtIndex(unsigned index);
+    void clear();
 };
 

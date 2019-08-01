@@ -21,13 +21,14 @@ void Explorer::generateFolderView(fs::path path)
 			}
 			else if (fs::is_regular_file(entry.status()))
             {
-				ExplorerItem* dir = new FileItem(entry.path().filename());
-                this->addView(dir);
+				ExplorerItem* file = new FileItem(entry.path().filename());
+                this->addView(file);
+                file->setChecked(true);
             }
 			else
 			{
-				ExplorerItem* dir = new ExplorerItem(entry.path().filename().string(), DirEntTypeEnum::Special);
-                this->addView(dir);
+				ExplorerItem* special = new ExplorerItem(entry.path().filename().string(), DirEntTypeEnum::Special);
+                this->addView(special);
             }
             if (filename.string() == "..")
             {
@@ -66,6 +67,15 @@ View* Explorer::getAtIndex(unsigned index)
     return children[index]->view;
 }
 
+void Explorer::clear()
+{
+    while(this->getViewsCount() > 1)
+    {
+        //debug("removing %s", ((ListItem*)this->getAtIndex(1))->getLabel().c_str());
+        this->removeView(1, true);
+        this->invalidate();
+    }
+}
 
 Explorer::Explorer(string path) : List(), pathItem(new ExplorerItem(path, DirEntTypeEnum::Path))
 {
@@ -96,18 +106,14 @@ ExplorerItem::ExplorerItem(string label, DirEntTypeEnum type) :
         if(((ExplorerItem*)view)->type != DirEntTypeEnum::File)
         {
             debug("clicked not file");
-            PlaylistMakerApp::explorer->setFocusedIndex(0);
             PlaylistMakerApp::explorer->pathItem->setValue(newPath.string());
-            Application::requestFocus(PlaylistMakerApp::explorer->pathItem, FocusDirection::NONE);
+            Application::requestFocus(PlaylistMakerApp::explorer, FocusDirection::NONE);
             
-            while(PlaylistMakerApp::explorer->getViewsCount() > 1)
-            {
-                debug("removing %s", ((ListItem*)PlaylistMakerApp::explorer->getAtIndex(1))->getLabel().c_str());
-                PlaylistMakerApp::explorer->removeView(1, true);
-                PlaylistMakerApp::explorer->invalidate();
-            }
+            PlaylistMakerApp::explorer->clear();
+
             debug("generate folder");
             PlaylistMakerApp::explorer->generateFolderView(newPath);
+            Application::requestFocus(PlaylistMakerApp::explorer, FocusDirection::NONE);
 
         }
     });
